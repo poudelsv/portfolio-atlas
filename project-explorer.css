@@ -1,0 +1,184 @@
+#works {
+  --explorer-ink: var(--text);
+  --explorer-border: color-mix(in srgb, var(--explorer-ink) 33%, transparent);
+  max-width: 75rem;
+  margin-inline: auto;
+  padding: clamp(2.8rem, 8vw, 6.5rem) clamp(1rem, 4vw, 3rem) 8rem;
+}
+
+.explorer-header { max-width: 46rem; margin-bottom: 1.4rem; }
+.explorer-header h1 { margin: 0 0 .6rem; font-size: clamp(1.6rem, 5vw, 2.65rem); line-height: 1.3; }
+.explorer-header p,
+.explorer-status,
+.explorer-card p,
+.explorer-map figcaption p,
+.explorer-empty,
+.explorer-map-empty { color: var(--explorer-ink); }
+
+.explorer-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .45rem;
+}
+
+.explorer-filter,
+.explorer-clear {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  gap: .55rem;
+  border: 1px solid var(--explorer-border);
+  border-radius: 2rem;
+  background: var(--light);
+  color: var(--explorer-ink);
+  padding: .42rem .75rem;
+  font-size: .86rem;
+  line-height: 1.4;
+  transition: background .18s, border-color .18s;
+}
+
+.explorer-filter span {
+  display: grid;
+  place-items: center;
+  min-width: 1.4rem;
+  padding: .06rem .25rem;
+  border-radius: 2rem;
+  background: var(--dark);
+  font-variant-numeric: tabular-nums;
+}
+
+.explorer-filter:hover,
+.explorer-clear:hover,
+.explorer-node:hover { border-color: var(--ink); }
+
+.explorer-filter[aria-pressed="true"],
+.explorer-node[aria-pressed="true"] {
+  background: var(--dark);
+  border-color: var(--ink);
+  box-shadow: inset 0 0 0 1px var(--ink);
+}
+
+.explorer-filter[aria-pressed="true"] span { background: var(--light); }
+
+.explorer-results-header {
+  min-height: 3.4rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: .6rem 1rem;
+  justify-content: space-between;
+  margin: .65rem 0 .2rem;
+}
+
+.explorer-status { margin: 0; font-size: .89rem; }
+.explorer-clear { padding: .27rem .65rem; }
+
+.explorer-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 19rem), 1fr));
+  gap: .85rem;
+}
+
+.explorer-card {
+  background: var(--light);
+  border: 1px solid var(--explorer-border);
+  border-radius: .85rem;
+  padding: 1rem;
+  min-width: 0;
+  transition: border-color .18s;
+}
+
+.explorer-card:focus-within,
+.explorer-card:hover { border-color: var(--ink); }
+
+.explorer-card h3 { margin: .7rem 0 .55rem; font-size: 1.08rem; line-height: 1.5; overflow-wrap: anywhere; }
+.explorer-card p { font-size: .93rem; margin: 0; }
+
+.explorer-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .25rem;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  color: var(--explorer-ink);
+}
+
+.explorer-tags li {
+  border-radius: 2rem;
+  padding: .19rem .53rem;
+  background: var(--dark);
+  font-size: .72rem;
+}
+
+.explorer-project-title {
+  appearance: none;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--explorer-ink);
+  font: inherit;
+  text-align: start;
+  text-decoration: underline;
+  text-underline-offset: .2em;
+  text-decoration-color: color-mix(in srgb, var(--ink) 70%, transparent);
+}
+
+.explorer-project-title:hover { text-decoration-color: var(--explorer-ink); }
+
+.explorer-map {
+  margin: clamp(2.2rem, 5vw, 3.5rem) 0 0;
+  border: 1px solid var(--explorer-border);
+  border-radius: 1rem;
+  background: var(--light);
+}
+
+.explorer-map figcaption { padding: 1rem 1.15rem; }
+.explorer-map figcaption h3 { margin: 0 0 .35rem; font-size: clamp(1.03rem, 3vw, 1.35rem); }
+.explorer-map figcaption p { margin: 0; font-size: .9rem; }
+.explorer-map-scroll { overflow-x: auto; border-radius: 0 0 .95rem .95rem; }
+
+.explorer-network {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(6rem, 1fr) minmax(14rem, 2fr) minmax(7rem, 1fr);
+  gap: clamp(1rem, 6vw, 5.5rem);
+  min-width: 33rem;
+  padding: .85rem 1.15rem 1.15rem;
+  border-top: 1px solid var(--explorer-border);
+  background-color: color-mix(in srgb, var(--dark) 33%, var(--light));
+  background-image: radial-gradient(circle, var(--explorer-border) 1px, transparent 1px);
+  background-size: 17px 17px;
+}
+
+.explorer-edges { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.explorer-network-column { position: relative; display: flex; flex-direction: column; min-width: 0; }
+.explorer-network-column h4 { margin: 0; padding: 0 0 .63rem; font-size: .75rem; }
+.explorer-network-column ul { display: grid; align-content: center; flex: 1; gap: .4rem; margin: 0; padding: 0; list-style: none; }
+
+.explorer-node {
+  appearance: none;
+  width: 100%;
+  min-width: 0;
+  padding: .38rem .45rem;
+  border: 1px solid var(--explorer-border);
+  border-radius: .45rem;
+  background: var(--light);
+  color: var(--explorer-ink);
+  text-align: center;
+  font-size: .78rem;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.project-node { font-weight: 650; }
+.tool-node { background: var(--dark); }
+.explorer-node-empty { text-align: center; color: var(--explorer-ink); font-size: .8rem; }
+.explorer-map-empty { margin: 0; padding: 0 1.15rem 1rem; font-size: .9rem; }
+.explorer-empty { padding: .85rem 0; margin: 0; }
+#works :is(button, a):focus-visible { outline-color: var(--explorer-ink); }
+
+@media (max-width: 38rem) {
+  .explorer-network { gap: 1rem; padding-inline: .8rem; }
+  .explorer-status { font-size: .84rem; }
+}
