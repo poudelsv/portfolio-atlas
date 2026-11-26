@@ -2,6 +2,10 @@
 
 A space-themed portfolio for Saurav Poudel’s work in data engineering, applied AI, software, and creative production. The site uses HTML, CSS, vanilla JavaScript, and Canvas. The `dist/` directory contains the complete static site.
 
+## Live site
+
+GitHub Pages serves the portfolio over HTTPS. The `gh-pages` branch contains a snapshot of `dist/` at its root, with `.nojekyll` to serve the files directly. A new snapshot on that branch publishes updates. [Open the live portfolio](https://poudelsv.github.io/portfolio-atlas/)
+
 ## Run locally
 
 From the repository root, start a static server with Python 3.
