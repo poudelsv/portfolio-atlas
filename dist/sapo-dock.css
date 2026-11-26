@@ -1,0 +1,110 @@
+.dock { color: #fff; }
+
+.dock-row {
+  position: relative;
+  isolation: isolate;
+  align-items: center;
+  gap: clamp(.12rem, .6vw, .42rem);
+  padding: .23rem .32rem;
+  border-radius: 1.45rem;
+  background: #203aaf;
+}
+
+.sapo-nav-earth {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  filter: brightness(.59) saturate(1.08);
+  pointer-events: none;
+}
+
+.dock .dock-shell { padding: 0; }
+.dock :is(.dock-shell, .ask-toggle) { background: transparent; }
+
+.dock .ask-toggle {
+  position: relative;
+  justify-content: center;
+  min-height: calc(var(--dock-height) - .46rem);
+  padding-block: 0;
+  padding-inline: clamp(.43rem, 1.4vw, .92rem);
+  border-radius: 999px;
+}
+
+.sapo-wordmark {
+  font: 900 clamp(1.2rem, 4vw, 1.78rem)/.85 var(--display, sans-serif);
+  text-transform: lowercase;
+  letter-spacing: -.075em;
+}
+
+.sapo-invite {
+  position: absolute;
+  z-index: 2;
+  inset-inline-start: 0;
+  bottom: calc(100% + .9rem);
+  width: max-content;
+  padding: .55rem .76rem .48rem;
+  border-radius: .78rem;
+  background: #e5ddff;
+  color: #211451;
+  font: 750 .9rem/1.15 var(--display, sans-serif);
+  text-transform: none;
+  pointer-events: none;
+  transform-origin: 1.45rem 100%;
+  animation: sapo-invite-arrive .28s cubic-bezier(.18, .75, .31, 1.35) both;
+}
+
+.sapo-invite::after {
+  position: absolute;
+  inset-inline-start: 1.15rem;
+  top: calc(100% - .32rem);
+  width: .68rem;
+  height: .68rem;
+  background: inherit;
+  transform: rotate(45deg);
+  content: "";
+}
+
+@keyframes sapo-invite-arrive {
+  from { opacity: 0; transform: translateY(.35rem) scale(.92); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sapo-invite { animation: none; }
+}
+
+.dock :is(.ask-toggle, .tabs a, .tabs button):is(:hover, [aria-current], [aria-expanded="true"]) {
+  background: #090d436e;
+  color: #fff;
+}
+
+.dock :is(.ask-toggle, .tabs a, .tabs button):focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: -2px;
+}
+
+.dock .contact-panel {
+  position: absolute;
+  z-index: 1;
+  left: 50%;
+  bottom: calc(100% + .36rem);
+  translate: -50% 0;
+  width: min(23rem, calc(100vw - 1rem));
+  border-radius: 1.05rem;
+  background: #111326;
+}
+
+.dock .contact-panel::before {
+  content: "";
+  position: absolute;
+  inset: 100% 0 auto;
+  height: .36rem;
+}
+
+@media (max-width: 340px) {
+  .dock-row { padding-inline: .2rem; }
+  .dock .ask-toggle { padding-inline: .3rem; }
+  .sapo-wordmark { font-size: 1.1rem; }
+}

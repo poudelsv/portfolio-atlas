@@ -1,0 +1,57 @@
+.aircraft-viewer {
+  position: relative;
+  isolation: isolate;
+  width: 100%;
+  text-align: center;
+  color: #fff;
+}
+
+.aircraft-canvas {
+  display: block;
+  width: 100%;
+  height: clamp(13rem, 32vw, 32rem);
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}
+
+.aircraft-canvas.is-dragging { cursor: grabbing; }
+.aircraft-viewer .aircraft-canvas:focus-visible { outline: 2px solid #cec2f7; outline-offset: 2px; }
+
+.aircraft-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: .1rem .8rem;
+  margin-inline: auto;
+}
+
+.aircraft-controls button {
+  border: 0;
+  min-height: 44px;
+  min-width: 44px;
+  padding: .35rem .3rem;
+  background: transparent;
+  color: inherit;
+  line-height: 1.2;
+}
+
+.aircraft-controls button:is(:hover, :focus-visible) {
+  color: #d6c7ff;
+  text-decoration: underline;
+  text-underline-offset: .26em;
+}
+
+.aircraft-instructions {
+  margin: .1rem auto 0;
+  max-width: 37ch;
+  color: #c1bec9;
+  font-size: .9rem;
+  line-height: 1.28;
+}
+
+@media (max-width: 560px) {
+  .aircraft-controls { gap: 0 .2rem; }
+  .aircraft-controls button { font-size: .94rem; }
+}

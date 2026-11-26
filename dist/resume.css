@@ -1,0 +1,482 @@
+#resume {
+  --career-accent: #f4af98;
+  --career-muted: #bdb9c1;
+  color: var(--text, #ece9ef);
+}
+
+.resume-experience {
+  --career-title-size: clamp(1.65rem, 5vw, 3.5rem);
+  --career-org-size: clamp(1rem, 2.25vw, 1.24rem);
+  max-width: 61rem;
+  margin-inline: auto;
+  text-align: center;
+}
+
+.career-header {
+  position: relative;
+  text-align: center;
+  margin: 0 0 clamp(.5rem, 2vw, 1.2rem);
+}
+
+.career-header h3 {
+  margin: 0;
+  color: var(--ink, #fff);
+  font-size: .88rem;
+  letter-spacing: .075em;
+  text-transform: uppercase;
+}
+
+.career-playback {
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 1;
+}
+
+.career-playback:not(:focus-visible) {
+  width: 1px;
+  height: 1px;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  overflow: hidden;
+  padding: 0;
+  border: 0;
+}
+
+.career-playback:focus-visible {
+  top: -2.65rem;
+  background: #171417;
+  color: #fff;
+  border: 0;
+  padding: .45rem .65rem;
+  border-radius: .35rem;
+  font-size: .84rem;
+}
+
+.career-stage {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  place-items: center;
+  min-height: clamp(17rem, 29vw, 24rem);
+}
+
+.career-role-panel {
+  grid-area: 1 / 1;
+  width: min(100%, 49rem);
+  padding: clamp(1rem, 3vw, 2.3rem) 0;
+  text-align: center;
+}
+
+.career-role-panel[aria-hidden="true"] { pointer-events: none; }
+
+.career-visual {
+  display: grid;
+  place-items: center;
+  height: clamp(4.8rem, 9vw, 7.8rem);
+  margin: 0 auto clamp(.45rem, 1.5vw, .9rem);
+}
+
+.career-company-mark {
+  display: grid;
+  place-items: center;
+  width: min(68%, 14rem);
+  height: 70%;
+  color: #fff;
+  font: 750 clamp(2rem, 5.5vw, 3.9rem)/1 var(--display, sans-serif);
+  letter-spacing: -.07em;
+}
+
+.career-company-mark img {
+  width: 100%;
+  max-height: 76%;
+  object-fit: contain;
+}
+
+.career-logo-monochrome { filter: brightness(0) invert(1); }
+
+.career-detail {
+  display: grid;
+  grid-template-rows: 1.38rem calc(2.12 * var(--career-title-size)) calc(2.65 * var(--career-org-size));
+  align-items: start;
+  justify-items: center;
+  row-gap: .42rem;
+  min-width: 0;
+}
+
+.career-date {
+  margin: 0;
+  color: var(--career-accent);
+  font: 600 .9rem/1.38rem var(--display, sans-serif);
+  font-variant-numeric: tabular-nums;
+}
+
+.career-detail h4 {
+  width: 100%;
+  margin: 0;
+  color: #fff;
+  font: 750 var(--career-title-size)/1.06 var(--display, sans-serif);
+  letter-spacing: -.045em;
+  text-wrap: balance;
+}
+
+.career-employer {
+  width: 100%;
+  margin: 0;
+  color: var(--ink, #fff);
+  font-size: var(--career-org-size);
+  font-weight: 650;
+  line-height: 1.25;
+  text-wrap: balance;
+}
+
+.career-location {
+  min-height: 1.22rem;
+  margin: 0;
+  color: var(--career-muted);
+  font-size: .88rem;
+  line-height: 1.22rem;
+}
+
+.career-controls {
+  max-width: 42rem;
+  margin: .3rem auto 0;
+  padding-inline: .42rem;
+}
+
+.career-dates {
+  --career-track-height: .16rem;
+  --career-target-height: 2rem;
+  --career-dot-size: .78rem;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  row-gap: .28rem;
+  align-items: center;
+  position: relative;
+}
+
+.career-track {
+  position: relative;
+  grid-area: 2 / 1;
+  height: var(--career-track-height);
+  border-radius: 999px;
+  background: #ffffff40;
+  pointer-events: none;
+}
+
+.career-track::before,
+.career-track::after {
+  content: "";
+  position: absolute;
+}
+
+.career-track::before {
+  inset: 0 auto 0 0;
+  width: clamp(0%, var(--career-position, 0%), 100%);
+  border-radius: inherit;
+  background: var(--career-accent);
+}
+
+.career-track::after {
+  top: 50%;
+  left: clamp(0%, var(--career-position, 0%), 100%);
+  z-index: 1;
+  width: var(--career-dot-size);
+  height: var(--career-dot-size);
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: #fff4ed;
+  box-shadow: 0 0 .65rem #f4af9859;
+}
+
+.career-tick {
+  position: absolute;
+  left: var(--career-tick);
+  top: 50%;
+  width: .16rem;
+  height: .43rem;
+  transform: translate(-50%, -50%);
+  border-radius: 999px;
+  background: #aa9190;
+}
+
+.career-range {
+  appearance: none;
+  grid-area: 2 / 1;
+  position: relative;
+  z-index: 2;
+  justify-self: center;
+  cursor: ew-resize;
+  height: var(--career-target-height);
+  width: calc(100% + var(--career-dot-size));
+  margin: 0;
+  background: transparent;
+}
+
+.career-range::-webkit-slider-runnable-track {
+  height: var(--career-track-height);
+  background: transparent;
+}
+
+.career-range::-webkit-slider-thumb {
+  appearance: none;
+  width: var(--career-dot-size);
+  height: var(--career-dot-size);
+  margin-top: calc((var(--career-track-height) - var(--career-dot-size)) / 2);
+  border: 0;
+  background: transparent;
+}
+
+.career-range::-moz-range-track,
+.career-range::-moz-range-progress {
+  height: var(--career-track-height);
+  background: transparent;
+}
+
+.career-range::-moz-range-thumb {
+  width: var(--career-dot-size);
+  height: var(--career-dot-size);
+  border: 0;
+  background: transparent;
+}
+
+.career-range:focus-visible {
+  outline: 2px solid var(--career-accent);
+  outline-offset: 1px;
+  border-radius: .45rem;
+}
+
+.career-current-date {
+  grid-area: 1 / 1;
+  margin: 0;
+  color: var(--career-accent);
+  font-size: .88rem;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+}
+
+.career-milestones {
+  grid-area: 3 / 1;
+  position: relative;
+  height: 2.25rem;
+}
+
+.career-milestone {
+  position: absolute;
+  left: clamp(1.07rem, var(--career-tick), 100% - 1.07rem);
+  transform: translateX(-50%);
+  white-space: nowrap;
+  min-height: 2.15rem;
+  padding: .28rem .12rem;
+  color: var(--career-muted);
+  background: none;
+  border: 0;
+  font: 600 .81rem/1.2 var(--display, sans-serif);
+}
+
+.career-milestone:hover,
+.career-milestone[aria-current] { color: #fff; }
+.career-milestone[aria-current] { text-decoration: underline; text-underline-offset: .3em; }
+
+.career-history-link {
+  display: inline-block;
+  margin-top: .6rem;
+  color: #e5d7d0;
+  font-size: .96rem;
+  text-underline-offset: .25em;
+}
+
+.career-history-link:hover { color: var(--career-accent); }
+
+.resume-companies {
+  width: min(100%, 56rem);
+  margin: clamp(4rem, 10vw, 7rem) auto 0;
+  text-align: center;
+  scroll-margin-top: 2rem;
+}
+
+.resume-companies > h3 {
+  max-width: 21ch;
+  margin: 0 auto clamp(1.65rem, 5vw, 3.2rem);
+  color: var(--ink, #fff);
+  font: 800 clamp(1.8rem, 4vw, 3.65rem)/1 var(--display, sans-serif);
+  letter-spacing: -.045em;
+  text-wrap: balance;
+}
+
+.resume-company-list {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: clamp(1rem, 2.2vw, 1.95rem) clamp(.65rem, 3vw, 2rem);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.resume-company-list li {
+  display: grid;
+  flex: 0 0 clamp(4.75rem, 15vw, 8.5rem);
+  min-height: 3.45rem;
+  place-items: center;
+  font-weight: 650;
+  line-height: 1.15;
+}
+
+.resume-company-list img {
+  display: block;
+  width: 100%;
+  height: clamp(2.15rem, 5.1vw, 2.9rem);
+  object-fit: contain;
+}
+
+.resume-company-light { filter: brightness(0) invert(1); }
+.resume-company-reverse { filter: invert(1); }
+.resume-company-lsg {
+  filter: invert(1) hue-rotate(180deg);
+  object-view-box: inset(25% 13.55%);
+}
+
+.resume-history {
+  max-width: 64rem;
+  margin: clamp(5.5rem, 13vw, 10rem) auto 0;
+  text-align: center;
+  scroll-margin-top: 1.6rem;
+}
+
+.resume-history > h3 {
+  margin: 0 auto clamp(3rem, 7vw, 5.6rem);
+  color: var(--ink, #fff);
+  font: 850 clamp(2.5rem, 7vw, 5.75rem)/.92 var(--display, sans-serif);
+  letter-spacing: -.065em;
+  text-transform: uppercase;
+  text-wrap: balance;
+}
+
+.resume-history-list {
+  display: grid;
+  gap: clamp(3.9rem, 8vw, 6.3rem);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.resume-history-entry { min-width: 0; }
+
+.resume-history-entry .history-date {
+  margin: 0 0 .6rem;
+  color: var(--career-accent);
+  font-size: .92rem;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: .018em;
+}
+
+.resume-history-entry h4 {
+  max-width: 28ch;
+  margin: 0 auto;
+  color: var(--ink, #fff);
+  font: 800 clamp(1.85rem, 4.55vw, 3.95rem)/1.01 var(--display, sans-serif);
+  letter-spacing: -.045em;
+  text-wrap: balance;
+}
+
+.history-company {
+  max-width: 42ch;
+  margin: .65rem auto 0;
+  color: #eee5e0;
+  font-size: clamp(1.02rem, 2.1vw, 1.32rem);
+  font-weight: 650;
+  line-height: 1.25;
+  text-wrap: balance;
+}
+
+.history-description {
+  max-width: 55ch;
+  margin: .9rem auto 0;
+  color: #ded9de;
+  font-size: clamp(1rem, 1.7vw, 1.15rem);
+  text-wrap: pretty;
+}
+
+.history-responsibilities {
+  max-width: 63ch;
+  margin: 1.25rem auto 0;
+  padding-left: 1.1rem;
+  color: #ded9de;
+  line-height: 1.49;
+  text-align: left;
+  text-wrap: pretty;
+}
+
+.history-responsibilities > li + li { margin-top: .50rem; }
+.history-responsibilities > li::marker { color: var(--career-accent); }
+
+.resume-credentials {
+  display: grid;
+  gap: clamp(3rem, 7vw, 5.25rem);
+  max-width: 58rem;
+  margin: clamp(4.2rem, 10vw, 8.5rem) auto 0;
+  text-align: center;
+}
+
+.credential-accolades {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(18rem, 100%), 1fr));
+  gap: clamp(2.3rem, 5vw, 4.3rem);
+  width: min(100%, 47rem);
+  margin-inline: auto;
+}
+
+.credential-skill-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(1.75rem, 4vw, 2.75rem) clamp(1.5rem, 4vw, 3rem);
+}
+
+.credential > h3, .resume-document-header h3 {
+  color: var(--ink, #fff);
+  font-size: clamp(1.55rem, 3.1vw, 2.35rem);
+  letter-spacing: -.04em;
+  margin: 0 0 .9rem;
+}
+.credential h4 { color: #fff; font-size: 1.11rem; margin: 0 0 .35rem; }
+.credential-education h4 { font-size: clamp(1.15rem, 2.4vw, 1.55rem); }
+.credential p { margin: .25rem auto; max-width: 42ch; }
+.credential-skills > h3 { margin-bottom: clamp(1.4rem, 3.5vw, 2.2rem); }
+.credential .credential-meta { color: var(--career-muted); font-size: .93rem; }
+.credential-tags, .credential-honors { line-height: 1.55; font-size: .96rem; margin: 0; }
+.credential-tags { display: flex; flex-wrap: wrap; justify-content: center; gap: .22rem .72rem; padding: 0; list-style: none; }
+.credential-tags > li { color: var(--career-muted); }
+.credential-honors { max-width: 35ch; margin-inline: auto; padding: 0; list-style: none; }
+.credential-honors > li + li { padding-top: .28rem; }
+
+.resume-document { max-width: 68rem; margin: clamp(4.2rem, 9vw, 7.5rem) auto 0; }
+
+.resume-document-header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: .75rem 1rem;
+  margin-bottom: 1.2rem;
+}
+
+.resume-document-header h3 { margin: 0; }
+.resume-document-header a.button { border: 0; background: none; text-decoration: underline; text-underline-offset: .22em; }
+.resume-document-preview { width: min(100%, 53.125rem); margin-inline: auto; }
+.resume-document-viewport { min-height: 2px; height: auto; }
+.resume-document-viewport canvas { display: block; width: 100%; height: auto; }
+.resume-document-controls { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; column-gap: 1rem; }
+.resume-document-controls button { background: transparent; border: 0; padding: .55rem .22rem; }
+.resume-document-controls button:disabled { opacity: .36; cursor: default; }
+
+@media (max-width: 46rem) {
+  .credential-skill-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 27rem) {
+  .credential-skill-grid { grid-template-columns: minmax(0, 1fr); max-width: 20rem; margin-inline: auto; }
+  .resume-experience { --career-title-size: clamp(1.34rem, 6.35vw, 1.7rem); }
+  .career-milestone { font-size: .7rem; }
+  .career-detail { grid-template-rows: 1.38rem calc(3.18 * var(--career-title-size)) calc(3.75 * var(--career-org-size)); }
+}
