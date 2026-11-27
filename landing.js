@@ -7,13 +7,16 @@ const labels = {
     ['experience', 'Where has he worked?'],
     ['availability', 'When can you start?'],
     ['job-search', 'What are you looking for?'],
+    [null, 'What is machine learning?'],
   ],
   workAnswer: 'Explore projects across aviation, healthcare, data, AI, and software.',
-  roleAnswer: 'My focus is data engineering, software development, and applied AI.',
+  roleAnswer: 'Saurav works on data engineering, software development, machine learning, and applied AI.',
   availabilityAnswer: 'I can start working in May 2027.',
   jobSearchAnswer: 'I’m looking for full-time roles related to data, AI, and software.',
-  contactAnswer: 'You can find my email, phone number, LinkedIn, and GitHub in Contact.',
-  fallback: 'I can answer questions using my portfolio. Ask about a named project, my experience, or the type of work I do.',
+  privacyAnswer: 'I keep this chat focused on professional work and general questions. Ask me about projects, skills, or a technical topic.',
+  contactAnswer: 'Open Contact in the navigation for professional contact options.',
+  fallback: 'I can help with questions about Saurav’s public projects, experience, and skills. Try asking about a specific project or work topic.',
+  aiUnavailable: 'General AI couldn’t run in this browser right now. Try again, or ask me about the portfolio.',
   repo: 'View repository',
 };
 const get = id => document.getElementById(id);
@@ -26,6 +29,11 @@ let contactTrigger = contactButtons[0];
 const question = get('question');
 const conversation = get('conversation');
 let contactCloseTimer;
+let generalWorker;
+let generating = false;
+const generalHistory = [];
+const privateValue = /[\w.+-]+@[\w.-]+\.[a-z]{2,}|\b\d{3}-\d{2}-\d{4}\b|(?:\+?1[ .-]?)?(?:\(\d{3}\)|\b\d{3})[ .-]?\d{3}[ .-]?\d{4}\b/i;
+const personalTopic = /\b(?:e[ -]?mail(?: address)?|phone number|cell number|home address|mailing address|zip code|birthday|birth date|date of birth|age|family|relationship|medical history|salary|gpa|social security|ssn|passport number|personal (?:info(?:rmation)?|details))\b/i;
 
 function make(tag, value, className) {
   const element = document.createElement(tag);
@@ -153,9 +161,15 @@ function addMessage(value, kind) {
   return message;
 }
 
-function ask(value, intent) {
-  const text = value.trim();
-  if (!text) return;
+function isPersonalQuestion(text) {
+  return privateValue.test(text) ||
+    /\b(?:where (?:do|does) (?:you|he|saurav(?: poudel)?) (?:live|stay)|how old (?:are you|is (?:he|saurav(?: poudel)?)))\b/i.test(text) ||
+    (personalTopic.test(text) && (/\b(?:saurav|poudel|you|your|he|his|portfolio owner)\b/i.test(text) ||
+      /\b(?:what(?:['’]s| is)|who|tell me|find|give|look up|show|reveal|share|disclose)\b.{0,85}(?:['’]s\s+|\b(?:their|her)\s+)/i.test(text) ||
+      /^\s*(?:e[ -]?mail|phone number|home address|birthday|gpa|ssn)\s*\??\s*$/i.test(text)));
+}
+
+function portfolioAnswer(text, intent) {
   const query = text.toLowerCase();
   const normalized = query.replace(/[^a-z0-9]+/g, '');
   const project = !intent && [...landingData.projects]
@@ -164,43 +178,104 @@ function ask(value, intent) {
       const name = title.toLowerCase().replace(/[^a-z0-9]+/g, '');
       return normalized.includes(name);
     }));
-  addMessage(text, 'user');
-  let reply = labels.fallback;
-  let link;
-  if (intent === 'availability' || /\b(?:start date|when (?:can|could|would) (?:you|saurav|he) (?:start|begin|join)|when (?:are you|is (?:saurav|he)) available|how soon (?:can|could) (?:you|saurav|he) start|available to (?:start|work))\b/.test(query)) {
-    reply = labels.availabilityAnswer;
-  } else if (intent === 'job-search' || /\b(?:(?:you|saurav|he) (?:are |is )?looking for|target roles|(?:roles?|jobs?|positions?) (?:do you |does (?:saurav|he) )?(?:want|seek)|seeking (?:roles?|jobs?|positions?|work))\b/.test(query)) {
-    reply = labels.jobSearchAnswer;
-  } else if (project) {
-    reply = project.description;
-    if (project.url) link = externalLink(labels.repo, project.url);
-  } else if (intent === 'experience' || /experience|worked|résumé|resume|travaill|delta|career/.test(query)) {
-    const delta = /delta/.test(query);
-    const experience = delta ? landingData.experience.filter(item => item.organization.includes('Delta')) : landingData.experience;
-    reply = experience.map(item => item.title + ' · ' + item.organization + '. ' + item.description).join(' ');
-  } else if (intent === 'projects' || /project|projet|portfolio|build|built/.test(query)) {
-    reply = labels.workAnswer + ' Start with ' + landingData.projects.slice(0, 3).map(item => item.title).join(', ') + '.';
-    link = make('a', 'Projects');
-    link.href = 'projects.html?v=case-studies';
-    link.addEventListener('click', () => setAsk(false, false));
-  } else if (/hire|contact|available|github|disponib/.test(query)) {
-    reply = labels.contactAnswer;
-    link = make('a', 'Open contact');
-    link.href = '#dock-contact';
-    link.addEventListener('click', event => {
-      event.preventDefault();
-      event.stopPropagation();
-      contactTrigger = get('dock-contact');
-      setContact(true, true);
-    });
-  } else if (intent === 'roles' || /skill|python|software|analytics|what.*do|que fait|\bai\b/.test(query)) {
-    reply = labels.roleAnswer;
+  const faq = sapoFaq.find(entry => entry.patterns.some(pattern => pattern.test(text)));
+  if (intent === 'availability' || /\b(?:when (?:can|could|would) (?:you|saurav|he) (?:start|begin|join)|when (?:are you|is (?:saurav|he)) available|how soon (?:can|could) (?:you|saurav|he) start|(?:your|his|saurav['’]s) start date)\b/.test(query)) {
+    return { reply: labels.availabilityAnswer };
   }
-  const answer = addMessage(reply, 'guide');
-  if (link) answer.append(' ', link);
-  conversation.scrollTop = conversation.scrollHeight;
+  if (intent === 'job-search' || /\b(?:what are you looking for|(?:your|his|saurav['’]s) (?:target roles|job search))\b/.test(query)) {
+    return { reply: labels.jobSearchAnswer };
+  }
+  if (intent === 'roles' || /\b(?:what (?:does saurav|do you) do|saurav['’]s professional focus)\b/.test(query)) {
+    return { reply: labels.roleAnswer };
+  }
+  if (intent === 'projects' || /\b(?:what projects (?:have you|has he|has saurav) built|show me (?:your|his|saurav['’]s) projects)\b/.test(query) || /^(?:projects|portfolio)\??$/.test(query)) {
+    return {
+      reply: labels.workAnswer + ' Start with ' + landingData.projects.slice(0, 3).map(item => item.title).join(', ') + '.',
+      link: externalLink('View projects', 'projects.html?v=case-studies'),
+    };
+  }
+  if (faq || project) {
+    return { reply: faq?.answer ?? project.description, link: project?.url ? externalLink(labels.repo, project.url) : null };
+  }
+  if (/\b(?:how (?:can|do|should) i (?:hire|contact|reach) (?:you|him|saurav)|contact saurav|professional contact|open contact)\b/.test(query)) {
+    return { reply: labels.contactAnswer };
+  }
+  if (intent === 'experience' || /\b(?:saurav|poudel|portfolio owner)\b/.test(query)) {
+    return { reply: labels.fallback };
+  }
+}
+
+function requestGeneralAnswer(text, onProgress) {
+  const worker = generalWorker ??= new Worker(new URL('sapo-ai-worker.js?v=1', location.href), { type: 'module' });
+  return new Promise((resolve, reject) => {
+    const timeout = setTimeout(fail, 240000);
+
+    function cleanup() {
+      clearTimeout(timeout);
+      worker.removeEventListener('message', receive);
+      worker.removeEventListener('error', fail);
+    }
+
+    function fail() {
+      cleanup();
+      worker.terminate();
+      generalWorker = undefined;
+      reject(new Error('General AI unavailable'));
+    }
+
+    function receive({ data }) {
+      if (data.type === 'progress') onProgress(data.text);
+      if (data.type === 'error') fail();
+      if (data.type === 'answer') {
+        cleanup();
+        resolve(data.text);
+      }
+    }
+
+    worker.addEventListener('message', receive);
+    worker.addEventListener('error', fail);
+    try {
+      worker.postMessage({ question: text, history: generalHistory });
+    } catch {
+      fail();
+    }
+  });
+}
+
+async function ask(value, intent) {
+  const text = value.trim();
+  if (!text) return;
+  const personal = isPersonalQuestion(text);
+  addMessage(personal ? 'A question about personal information' : text, 'user');
   question.value = '';
   question.focus();
+  const known = personal ? { reply: labels.privacyAnswer } : portfolioAnswer(text, intent);
+  if (known) {
+    const answer = addMessage(known.reply, 'guide');
+    if (known.link) answer.append(' ', known.link);
+  } else if (generating) {
+    addMessage('Sapo is still working on the previous general question.', 'guide');
+  } else {
+    generating = true;
+    const answer = addMessage('Starting general AI in your browser…', 'guide');
+    conversation.scrollTop = conversation.scrollHeight;
+    try {
+      const result = await requestGeneralAnswer(text, progress => { answer.textContent = progress; });
+      const cleanReply = typeof result === 'string' ? result.trim() : '';
+      if (!cleanReply) throw new Error('Empty answer');
+      answer.classList.add('generated');
+      answer.textContent = privateValue.test(cleanReply) ? labels.privacyAnswer : cleanReply;
+      if (answer.textContent === cleanReply) {
+        generalHistory.push({ role: 'user', content: text }, { role: 'assistant', content: cleanReply });
+        if (generalHistory.length > 4) generalHistory.splice(0, generalHistory.length - 4);
+      }
+    } catch {
+      answer.textContent = labels.aiUnavailable;
+    } finally {
+      generating = false;
+    }
+  }
+  conversation.scrollTop = conversation.scrollHeight;
 }
 
 function playIntro() {

@@ -449,6 +449,7 @@
 .credential-tags > li { color: var(--career-muted); }
 .credential-honors { max-width: 35ch; margin-inline: auto; padding: 0; list-style: none; }
 .credential-honors > li + li { padding-top: .28rem; }
+.credential-honors a { text-underline-offset: .2em; }
 
 .resume-document { max-width: 68rem; margin: clamp(4.2rem, 9vw, 7.5rem) auto 0; }
 

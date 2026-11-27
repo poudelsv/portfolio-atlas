@@ -319,6 +319,7 @@ function initResume() {
     ['LSG Sky Chefs', 'companies/lsg.png', 'lsg'],
     ['IBM', 'companies/ibm.svg', 'light'],
     ['Gate Gourmet', 'companies/gate-gourmet.svg'],
+    ['Newrest', 'companies/newrest.png'],
     ['DO & CO', 'companies/do-and-co.png'],
     ['Unifi', 'companies/unifi.png'],
     ['VRPatients', 'companies/vrpatients.png'],
@@ -396,13 +397,23 @@ function initResume() {
   for (const [label, items] of [['Honors', honors.filter(item => !certifications.includes(item))], ['Certifications', certifications]]) {
     if (!items.length) continue;
     const group = element('section', '', 'credential');
-    group.append(element('h3', label), list('ul', items, 'credential-honors'));
+    const entries = list('ul', items, 'credential-honors');
+    for (const entry of entries.children) {
+      const url = landingData.certificationLinks?.[entry.textContent];
+      if (!url) continue;
+      const link = element('a', entry.textContent);
+      link.href = url;
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+      entry.replaceChildren(link);
+    }
+    group.append(element('h3', label), entries);
     accolades.append(group);
   }
   if (accolades.childElementCount) credentials.append(accolades);
   if (credentials.childElementCount) section.append(credentials);
 
-  const pdfPath = 'assets/Saurav-Poudel-Resume.pdf?v=timeline';
+  const pdfPath = 'assets/Saurav-Poudel-Resume.pdf?v=credentials-391';
   const pdf = element('section', '', 'resume-document');
   const pdfHeader = element('header', '', 'resume-document-header');
   const pdfTitle = element('h3', 'Résumé PDF');
