@@ -48,12 +48,6 @@
     },
   };
 
-  const toolsets = {
-    photography: ['Adobe Creative Cloud', 'Lightroom', 'Photoshop'],
-    videography: ['Adobe Creative Cloud', 'Premiere Pro', 'After Effects', 'DaVinci Resolve', 'Final Cut Pro'],
-    modeling: ['Blender', 'Autodesk Maya', 'After Effects', 'Unity', 'Unreal Engine'],
-    design: ['Adobe Creative Cloud', 'Illustrator', 'Photoshop', 'InDesign'],
-  };
   for (const [kind, item] of Object.entries(portfolio)) {
     item.frames = [
       ...(typeof behanceWorks === 'undefined' ? [] : behanceWorks[kind] || []).map(work => ({
@@ -233,13 +227,24 @@
     viewer.append(stage, controls, frameIndex);
     const story = element('section', '', 'creative-story');
     const tools = element('ul', '', 'creative-tool-list');
-    tools.append(...toolsets[medium].map(tool => element('li', tool)));
-    story.append(element('h2', 'Creative tools'), tools, element('h2', 'Sample study'), element('p', section.brief), element('p', section.process));
+    const toolHeading = element('h2', 'Creative tools');
+    toolHeading.id = 'creative-tools';
+    tools.append(...creativeToolsets[medium].map(tool => element('li', tool)));
+    story.append(toolHeading, tools, element('h2', 'Sample study'), element('p', section.brief), element('p', section.process));
     page.append(back, header, viewer, story);
     root.append(page);
-    renderFrame(0);
+    const work = new URLSearchParams(location.search).get('work');
+    const requestedFrame = work ? section.frames.findIndex(frame => sapoSlug(frame.title) === work) : -1;
+    renderFrame(Math.max(0, requestedFrame));
   }
 
   if (section) renderCase();
   else renderIndex();
+
+  if (location.hash && performance.getEntriesByType('navigation')[0]?.type !== 'back_forward') {
+    addEventListener('DOMContentLoaded', () => {
+      const target = document.getElementById(location.hash.slice(1));
+      if (target && root.contains(target)) target.scrollIntoView({ block: 'start', behavior: 'instant' });
+    }, { once: true });
+  }
 })();

@@ -26,12 +26,14 @@ The site runs directly from `dist/`. A modern browser supports the Canvas animat
 | [Résumé](dist/resume.html) | Scrub through a career timeline, browse work history and collaborators, and view or download the PDF résumé. |
 | [Projects](dist/projects.html) | Filter work by field, browse project cards, and open case studies with tools, contributions, and reported outcomes. An interactive relationship map connects fields, projects, and tools. |
 | [Creative Projects](dist/creative.html) | Explore photography, videography, 3D modeling and animation, and graphic design galleries. Published work links to Behance, and example slides are labeled as sample studies. |
-| Ask Sapo AI and Contact | Open the shared dock to browse professional answers, ask general questions, or access contact links. |
+| sapo.ai and Contact | Ask questions about Saurav’s professional work in the shared dock and follow links to the relevant case study, résumé entry, or gallery. |
 | `.sapo` companion | Follow a portrait-based character that rides a momo during scrolling and pointer movement, offers occasional speech bubbles, and reacts to clicks. Three quick clicks trigger a ghost animation followed by revival. |
 
 Planetary covers and the starfield are drawn in Canvas. Reduced-motion preferences turn off page morphs, companion following, and automatic résumé playback.
 
-Sapo answers portfolio questions from the curated FAQ and project data. The first general question loads an approximately 137 MB model, which runs in a browser worker. A supported browser can cache the model for later visits. Chat messages stay on the device. The site requires no API key or inference server. [SmolLM2-135M-Instruct](https://huggingface.co/HuggingFaceTB/SmolLM2-135M-Instruct), [Transformers.js](https://huggingface.co/docs/transformers.js/en/pipelines)
+sapo.ai ranks questions against the portfolio’s projects, role descriptions, skills, credentials, creative work, and first-person question examples. It builds its search index in the browser and links answers to the source material. Unrelated questions get a short redirect. Chat messages stay on the device and the site requires no API key, model download, or inference server.
+
+Run `node --test tests/sapo-search.test.cjs` to verify answer routing, privacy handling, and source links.
 
 ## Edit the portfolio
 
@@ -40,8 +42,8 @@ Sapo answers portfolio questions from the curated FAQ and project data. The firs
 | [`dist/landing-data.js`](dist/landing-data.js) | Introduction, contact details, work history, skills, and case studies. Keep each project’s field and tool tags current so the relationship map reflects the project data. |
 | [`dist/resume.js`](dist/resume.js) | Career timeline and collaborator logo presentation. Replace [the bundled résumé PDF](dist/assets/Saurav-Poudel-Resume.pdf) when updating the downloadable version. |
 | [`dist/creative.js`](dist/creative.js) and [`dist/behance-works.js`](dist/behance-works.js) | Gallery content, sample frames, toolsets, and published work links. Place local gallery media in [`dist/assets/creative/`](dist/assets/creative/). |
-| [`dist/landing.js`](dist/landing.js) | Chat routing, contact panel, and project case-study dialogs. |
-| [`dist/sapo-faq.js`](dist/sapo-faq.js) and [`dist/sapo-ai-worker.js`](dist/sapo-ai-worker.js) | Curated professional Q&A and local AI model configuration. |
+| [`dist/landing.js`](dist/landing.js) | Chat interface, contact panel, and project case-study dialogs. |
+| [`dist/sapo-profile.js`](dist/sapo-profile.js) and [`dist/sapo-search.js`](dist/sapo-search.js) | First-person examples, portfolio search, and answer links. |
 | [`dist/sapo-buddy.js`](dist/sapo-buddy.js) and [`dist/sapo-buddy.css`](dist/sapo-buddy.css) | Companion movement, occasional messages, click reactions, and the momo ride. |
 | [`dist/earth.js`](dist/earth.js), [`dist/planets.js`](dist/planets.js), and [`dist/solar.css`](dist/solar.css) | Procedural planetary covers, shared view transitions, and layout. |
 

@@ -6,7 +6,7 @@
 
   const callout = document.createElement('span');
   callout.className = 'sapo-invite';
-  callout.textContent = 'Ask my sapo AI';
+  callout.textContent = 'Ask sapo.ai';
   callout.setAttribute('aria-hidden', 'true');
   callout.hidden = true;
   trigger.append(callout);

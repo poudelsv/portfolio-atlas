@@ -265,5 +265,13 @@ function initExplorer(openProject) {
   relationships.append(node('summary', 'Explore project relationships'), map);
   relationships.addEventListener('toggle', scheduleDraw);
   section.replaceChildren(header, filters, resultsHeader, cards, pager, relationships);
-  render();
+  const route = new URLSearchParams(location.search);
+  const field = fields.find(item => item.toLowerCase() === route.get('field')?.toLowerCase());
+  setField(field || '');
+  const requestedProject = route.get('project');
+  const index = displayedProjects.findIndex(project => sapoSlug(project.title) === requestedProject);
+  if (index >= 0) {
+    showProject(index);
+    openProject(displayedProjects[index]);
+  }
 }
