@@ -2,7 +2,7 @@ const sapoProfile = [
   {
     id: 'professional-introduction',
     title: 'Professional introduction',
-    aliases: ['who is saurav', 'who are you', 'what does saurav do', 'introduce yourself', 'tell me about yourself', 'what is your background', 'what is his name', 'what is your name'],
+    aliases: ['who is saurav', 'who are you', 'what does saurav do', 'what does he do', 'where does he do', 'what do you do', 'introduce yourself', 'tell me about yourself', 'what is your background', 'what is his name', 'what is your name'],
     answer: 'I’m Saurav Poudel, an Information Technology senior at the University of Cincinnati. I’ve worked on airline safety analytics, clinical education and virtual reality, and software development. I expect to graduate in May 2027 and am looking for full-time roles in data, software, and applied AI.',
     links: [{ label: 'About me', href: './#introduction' }, { label: 'Work history', href: 'resume.html#resume-history' }],
   },
@@ -14,9 +14,23 @@ const sapoProfile = [
     links: [{ label: 'Education', href: 'resume.html#resume-education' }],
   },
   {
+    id: 'university',
+    title: 'University of Cincinnati',
+    aliases: ['university', 'school', 'which university does he go to', 'which university does saurav go to', 'what university do you go to', 'what university does he attend', 'which school does he attend', 'where does he go to school', 'what college does saurav attend', 'which university do you attend', 'place of study', 'where is he enrolled'],
+    answer: 'I attend the University of Cincinnati in Cincinnati, Ohio. I’m pursuing a B.S. in Information Technology and expect to graduate in May 2027.',
+    links: [{ label: 'Education', href: 'resume.html#resume-education' }],
+  },
+  {
+    id: 'university-location',
+    title: 'University location',
+    aliases: ['where is the university', 'where is his university', 'where is your university located', 'where is the university of cincinnati located', 'where is the school located', 'what city is his university in', 'where does he study', 'where does saurav study', 'where do you study'],
+    answer: 'I study at the University of Cincinnati in Cincinnati, Ohio.',
+    links: [{ label: 'Education', href: 'resume.html#resume-education' }],
+  },
+  {
     id: 'career-interests',
     title: 'Career interests and start date',
-    aliases: ['what jobs is he looking for', 'what are you looking for', 'what roles are you looking for', 'what roles interest you', 'when can you start', 'when can saurav start', 'available to start', 'full-time availability', 'career interests', 'what kind of role does saurav want'],
+    aliases: ['what jobs is he looking for', 'what kind of job is he looking for', 'what kind of job is saurav looking for', 'what kind of job are you looking for', 'what role is he seeking', 'what are you looking for', 'what roles are you looking for', 'what roles interest you', 'when can you start', 'when can saurav start', 'available to start', 'full-time availability', 'career interests', 'what kind of role does saurav want'],
     answer: 'I can start full-time in May 2027. I’m interested in analytics engineering, data engineering, software engineering and applied AI, with interests in business intelligence and safety analytics.',
     links: [{ label: 'About', href: './#introduction' }, { label: 'Work history', href: 'resume.html#resume-history' }],
   },
@@ -30,9 +44,26 @@ const sapoProfile = [
   {
     id: 'relocation',
     title: 'Relocation for work',
-    aliases: ['are you open to relocation', 'willing to relocate', 'would saurav relocate', 'where can you work', 'relocate in the United States'],
-    answer: 'I’m open to relocating anywhere in the United States for a full-time role.',
+    aliases: ['relocation', 'are you open to relocation', 'is he open to relocation', 'is saurav open to relocation', 'open to relocating anywhere', 'willing to relocate', 'would saurav relocate', 'would he relocate', 'where can you work', 'relocate in the United States', 'relocate anywhere in the us'],
+    answer: 'Yes. I’m open to relocating anywhere in the United States for a full-time role.',
     links: [{ label: 'About', href: './#introduction' }],
+  },
+  {
+    id: 'current-work',
+    title: 'Current work',
+    aliases: ['where does he work', 'where does saurav work', 'where do you work', 'who does he work for', 'who do you work for', 'which organization does he work for', 'which company do you work for', 'what does he do for work', 'where is saurav currently employed', 'current employer', 'current job', 'current roles', 'what is his current position'],
+    answer: 'I work as a Preceptor Verification & Clinical Analyst for the University of Cincinnati College of Nursing, where I verify clinical preceptor licenses and build reporting workflows. I’m also a Resident Advisor for University of Cincinnati Residence Life.',
+    links: [
+      { label: 'Clinical analyst role', href: 'resume.html#resume-role-preceptor-verification-clinical-analyst' },
+      { label: 'Resident Advisor role', href: 'resume.html#resume-role-resident-advisor' },
+    ],
+  },
+  {
+    id: 'work-and-study-location',
+    title: 'Current work and study location',
+    aliases: ['where is saurav based professionally', 'where is he based', 'where is saurav based', 'where is he located at', 'where are you located', 'what city does he work in', 'what city do you work in', 'where are his work and studies based', 'where does he work and study', 'is saurav in cincinnati or atlanta', 'where did you work geographically'],
+    answer: 'My studies and current university roles are through the University of Cincinnati in Cincinnati, Ohio. My College of Nursing role is remote, and my Residence Life role is on-site. My two Delta co-ops were based in Atlanta, Georgia.',
+    links: [{ label: 'Education', href: 'resume.html#resume-education' }, { label: 'Work history', href: 'resume.html#resume-history' }],
   },
   {
     id: 'delta-experience-overview',
@@ -183,11 +214,28 @@ const sapoProfile = [
     links: [{ label: 'Fleet safety analytics', href: 'projects.html?project=lytx-fleet-telematics-and-station-risk-profile#works' }, { label: 'Clinical analyst role', href: 'resume.html#resume-role-preceptor-verification-clinical-analyst' }],
   },
   {
+    id: 'business-experience',
+    title: 'Business and operations experience',
+    aliases: ['business experience', 'does he have business experience', 'what business experience does saurav have', 'do you have business experience', 'what has he done on the business side', 'examples of business experience', 'business operations experience', 'operational finance experience'],
+    answer: 'My business experience is in operations analytics and process improvement. At Delta, I worked with IBM and frontline teams to consolidate audit forms into one Salesforce case workflow. I also modeled the cost of recurring vendor damage and presented the findings to support corrective action.',
+    links: [
+      { label: 'Salesforce Catering Connect', href: 'projects.html?project=salesforce-catering-connect#works' },
+      { label: 'Vendor damage cost analysis', href: 'projects.html?project=vendor-damage-cost-forecasting-and-safety-audit-reconciliation#works' },
+    ],
+  },
+  {
     id: 'certifications-and-honors',
     title: 'Certifications and professional honors',
     aliases: ['what certifications do you have', 'what certifications does saurav have', 'are you salesforce certified', 'which agentforce credential', 'what honors has saurav earned', 'did you earn scholarships'],
     answer: 'My résumé lists Salesforce Certified Agentforce Specialist, a Six Sigma Lean White Belt through Delta Air Lines, and Neo4j Fundamentals. It also includes the National Co-op Ambassador Scholarship and other University of Cincinnati honors.',
     links: [{ label: 'Certifications', href: 'resume.html#resume-certifications' }, { label: 'Honors', href: 'resume.html#resume-honors' }],
+  },
+  {
+    id: 'design-experience',
+    title: 'Graphic design experience',
+    aliases: ['design', 'graphic design', 'does he do design', 'does saurav have design experience', 'design experience', 'what kind of design does he do', 'what design work have you done', 'show me your design work', 'design portfolio', 'poster design'],
+    answer: 'My design work includes posters and graphics, social media materials, and portfolio design. At University of Cincinnati Impact Autism, I created accessible campaign graphics and social posts for Giving Tuesday and UC Day of Giving. My graphic design gallery links to my poster collection and portfolio case study.',
+    links: [{ label: 'Graphic design gallery', href: 'design.html#creative' }, { label: 'Marketing and design role', href: 'resume.html#resume-role-marketing-design-specialist' }],
   },
   {
     id: 'creative-and-technical-overlap',

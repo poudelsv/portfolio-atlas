@@ -1,8 +1,10 @@
 'use strict';
 
-const sapoUnrelated = 'I can answer things about Saurav. For general answer, Bing it :)';
+const sapoUnrelated = 'I can answer things about Saurav. for general questions, bing it :)';
+const sapoSourceOnly = 'I think you may find the information here. Check it out.';
 const sapoPrivateValue = /[\w.+-]+@[\w.-]+\.[a-z]{2,}|\b\d{3}-\d{2}-\d{4}\b|(?:\+?1[ .-]?)?(?:\(\d{3}\)|\b\d{3})[ .-]?\d{3}[ .-]?\d{4}\b/i;
-const sapoStopWords = new Set('a about after all am an and any are as at been by can could did do does during for from had has have he her his how i in is it its me my of on or our she should so than that the their them these they this to us was were what when where which who why will with would you your saurav poudel tell show give describe please experience used use using work worked works working project projects role roles headline portfolio examples example know'.split(' '));
+const sapoPrivateTopics = /\b(?:email(?: address)?|e mail|phone|telephone|cell number|home|house|residential|apartment|street address|mailing address|zip code|birthday|birth date|date of birth|age|family|parents|relationship status|medical (?:history|records)|salary|income|compensation|social security|ssn|passport|driver license number|student id|bank account|credit card number|password|personal (?:info|information|details|contact)|national origin|exact location|live location|gps coordinates|real time location|private (?:address|contact|number|account)|credentials? (?:password|secret))\b/;
+const sapoStopWords = new Set('a about after all am an and any are as at been by can could did do does during for from had has have he her his how i in is it its me my of on or our she should so than that the their them these they this to us was were what when where which who why will with would you your saurav poudel tell show give describe please experience used use using uses work worked works working project projects role roles headline portfolio examples example know'.split(' '));
 const sapoWordAliases = [
   [/\bsnowflakes\b/g, 'snowflake'], [/\bpostg?res\b/g, 'postgresql'],
   [/\bpowerbi\b/g, 'power bi'], [/\bnode\.?js\b/g, 'node js'], [/\breact\.?js\b/g, 'react'],
@@ -14,6 +16,11 @@ const sapoWordAliases = [
   [/\bco[ -]?ops?\b/g, 'co op'], [/\bcerts?\b/g, 'certification'],
   [/\b(?:studied|studying)\b/g, 'study'], [/\bgraduating\b/g, 'graduate'],
   [/\bdeans\b/g, 'dean'],
+  [/\byo\s+u(?=\s|[a-z]|$)/g, 'you '], [/\b(?:u|y\s+ou)\b/g, 'you'],
+  [/\b(?:begin|begins|onboard)\b/g, 'start'], [/\b(?:employed|employment)\b/g, 'work'],
+  [/\b(?:moving|move|relocating|relocation)\b/g, 'relocate'],
+  [/\b(?:positions?|jobs?)\b/g, 'job'], [/\b(?:seeking|searching for|looking to find)\b/g, 'looking for'],
+  [/\b(?:experianc(?:e)?|exprience)\b/g, 'experience'], [/\b(?:adress|addres)\b/g, 'address'],
 ];
 
 function sapoSlug(title) {
@@ -50,13 +57,22 @@ function sapoRoleLink(role) {
 
 function sapoPrivacy(text, query) {
   if (sapoPrivateValue.test(text)) return true;
-  return /\b(?:where (?:do|does) (?:you|he|saurav(?: poudel)?) (?:live|stay)|how old (?:are you|is (?:he|saurav(?: poudel)?)))\b/.test(query) ||
-    (/\b(?:e ?mail(?: address)?|phone(?: number)?|cell number|home address|street address|mailing address|zip code|birthday|birth date|date of birth|age|family|relationship status|medical history|salary|social security|ssn|passport number|personal (?:info|information|details))\b/.test(query) &&
-      (/\b(?:saurav|poudel|you|your|he|his|their|her)\b/.test(query) ||
-       /^\s*(?:e ?mail|phone(?: number)?|home address|birthday|ssn)\s*$/.test(query)));
+  const person = /\b(?:saurav|poudel|you|your|he|his|their|her)\b/.test(query);
+  const whereabouts = /\b(?:where (?:do|does|did) (?:you|he|saurav(?: poudel)?) (?:live|stay|reside)|how old (?:are you|is (?:he|saurav(?: poudel)?)))\b/.test(query) ||
+    (/\b(?:where|location).{0,45}\b(?:right now|this moment|tonight)\b/.test(query) && !/\b(?:work|university|school|campus|office|study)\b/.test(query));
+  const physicalAddress = /\b(?:your|his|saurav)(?: (?:real|mailing|street|current|personal|exact|physical))? address\b/.test(query);
+  const request = /\b(?:reveal|give me|look up|find me|tell me|show me|what is)\b/.test(query);
+  const personalDetail = sapoPrivateTopics.test(query);
+  const bare = /^(?:e ?mail|phone(?: number)?|home address|address|birthday|age|ssn|passport|salary|personal info)$/.test(query);
+  return bare || (person && (whereabouts || physicalAddress)) ||
+    (personalDetail && (person || (request && /\b(?:someone|person|anyone|number|private|personal)\b/.test(query))));
 }
 
-function initSapoSearch() {
+function sapoTreeLink(filter, value) {
+  return { label: 'Project tree', href: 'projects.html' + (filter ? '?' + filter + '=' + encodeURIComponent(value) : '') + '#project-tree' };
+}
+
+function initSapoSearch(storage) {
   const about = { label: 'About', href: './#introduction' };
   const skills = { label: 'Skills', href: 'resume.html#resume-skills' };
   const history = { label: 'Work history', href: 'resume.html#resume-history' };
@@ -68,12 +84,14 @@ function initSapoSearch() {
   const collaborators = { label: 'Collaborators', href: 'resume.html#resume-companies' };
   const tools = new Map();
   const records = [];
+  const sessionKey = 'sapo-confirmed-sources';
+  const seenDetail = new Map();
   let recent;
 
   function addRecord(record, aliases, facts = []) {
     const phrases = [...new Set([record.title, ...aliases].map(sapoNormalize).filter(Boolean))];
-    records.push({ ...record, phrases, facts, titleTerms: sapoTerms(phrases.join(' ')),
-      factTerms: sapoTerms(sapoNormalize(facts.join(' ') + ' ' + record.answer)) });
+    const summary = sapoNormalize(facts.join(' ') + ' ' + record.answer);
+    records.push({ ...record, phrases, summary, titleTerms: sapoTerms(phrases.join(' ')), factTerms: sapoTerms(summary) });
   }
 
   function noteTool(label, source, type) {
@@ -140,7 +158,7 @@ function initSapoSearch() {
     const uniqueOrganization = organization !== item.organization && !landingData.experience.some(other => other !== item && other.organization === item.organization);
     addRecord({ title: item.title, kind: 'role', item, answer: lead + ' ' + sapoFirstPerson(item.description), links: [sapoRoleLink(item)] },
       [...(uniqueOrganization ? [organization] : []), ...(item.title === 'Sustainability Program Support' ? ['sustainability office'] : [])],
-      [...item.highlights || [], item.organization, item.dates]);
+      [...item.highlights || [], item.organization, item.dates, item.location]);
     for (const tool of item.tools || []) noteTool(tool, item, 'roles');
   }
   for (const group of landingData.skills) {
@@ -194,6 +212,54 @@ function initSapoSearch() {
   tools.set('amazon web services', { label: 'AWS', projects: landingData.projects.filter(item => item.tools.some(tool => /\b(?:AWS|Amazon)\b/.test(tool))), roles: [], galleries: [] });
   for (const [alias, key] of toolAliases) if (tools.has(key)) tools.set(alias, tools.get(key));
   const toolNames = [...tools.keys()].sort((first, second) => second.length - first.length);
+  const profile = new Map(records.filter(record => record.id).map(record => [record.id, record]));
+  const sources = new Map();
+  for (const record of records) {
+    for (const { href } of record.links) {
+      if (!sources.has(href) || record.kind === 'project' || record.kind === 'role') sources.set(href, record);
+    }
+  }
+  const preferences = new Map();
+  try {
+    const saved = JSON.parse(storage?.getItem(sessionKey) || '[]');
+    const entries = Array.isArray(saved) ? saved.slice(0, 12).filter(Array.isArray) : [];
+    for (const [href, count] of entries) {
+      if (sources.has(href) && Number.isInteger(count) && count > 0 && count <= 3) preferences.set(href, count);
+    }
+    recent = sources.get([...preferences.keys()].at(-1));
+  } catch {
+    // Search works when session storage is unavailable.
+  }
+
+  const privacyVocabulary = 'phone address whereabouts apartment residential salary birthday family passport security password personal information parent bank credit email privacy private exact current coordinates live ssn contact number';
+  const repair = sapoFitSpelling([
+    ...records.flatMap(record => [...record.phrases, record.summary]), ...toolNames, privacyVocabulary,
+    'what project used a tool what kind of work when can you start is he open to relocation how did you use',
+  ]);
+  const matchIntents = sapoFitIntents(records, sapoTerms, weight);
+
+  function addTree(answer, record, tool) {
+    const links = [...new Map(answer.links.map(link => [link.href, link])).values()];
+    const projectLink = links.find(link => /[?&]project=/.test(link.href));
+    const fieldLink = links.find(link => /[?&]field=/.test(link.href));
+    const workLink = links.find(link => /^resume\.html#resume-(?:role-|history|companies|skills)/.test(link.href));
+    let tree;
+    if (tool) {
+      const key = tool.projects.some(project => project.tools.includes(tool.label)) ? tool.label : '';
+      tree = key ? sapoTreeLink('tool', key) : sapoTreeLink();
+    } else if (projectLink) {
+      const [, slug] = /[?&]project=([^&#]+)/.exec(projectLink.href);
+      tree = sapoTreeLink('project', decodeURIComponent(slug));
+    } else if (fieldLink) {
+      const [, field] = /[?&]field=([^&#]+)/.exec(fieldLink.href);
+      tree = sapoTreeLink('field', decodeURIComponent(field));
+    } else if (record?.item?.logoKey === 'delta' || record?.id?.startsWith('delta-')) {
+      tree = sapoTreeLink('field', 'Aviation');
+    } else if (workLink || links.some(link => link.href === projects.href || /\.html#creative(?:-tools)?$|[?&]work=/.test(link.href))) {
+      tree = sapoTreeLink();
+    }
+    return { ...answer, links: tree ? [...links.slice(0, 3), tree] : links.slice(0, 3) };
+  }
 
   function answerRecord(record, query, terms) {
     let answer = record.answer;
@@ -206,9 +272,17 @@ function initSapoSearch() {
       if (item.tools?.length && /\b(?:tools?|stack|technologies|frameworks?|tech)\b/.test(query)) {
         return { reply: answer + ' The tools I list for this case study are ' + item.tools.join(', ') + '.', links: record.links };
       }
+      if (record.kind === 'role' && item.location && /\b(?:where|city|location|located|based|remote|on site)\b/.test(query)) {
+        const [city, setting] = item.location.split(' · ');
+        return { reply: answer + ' My résumé lists the role in ' + city + (setting ? ' (' + setting.toLowerCase() + ')' : '') + '.', links: record.links };
+      }
       const details = item.contributions || item.highlights || [];
       const ranked = details.map(fact => ({ fact, score: evidence(fact, terms) })).sort((a, b) => b.score - a.score);
-      const detail = ranked[0]?.score > 0 ? ranked[0].fact : details[0];
+      const more = /\b(?:tell me more|more details|elaborate|what else)\b/.test(query);
+      const last = seenDetail.get(record);
+      const detail = more && details.length ? details[(details.indexOf(last) + 1) % details.length] : ranked[0]?.fact;
+      if (detail) seenDetail.set(record, detail);
+      if (more && detail) return { reply: sapoFirstPerson(detail), links: record.links };
       if (detail && !sapoNormalize(answer).includes(sapoNormalize(detail))) answer += ' ' + sapoFirstPerson(detail);
     }
     return { reply: answer, links: record.links };
@@ -237,7 +311,13 @@ function initSapoSearch() {
       if (/\b(?:in production|at work|on the job)\b/.test(query) && /portfolio implementation|coursework/.test(work.category.toLowerCase())) {
         return { reply: 'I document ' + tool.label + ' in my ' + work.title + ' project. I haven’t documented production use of it.', links: [sapoProjectLink(work), skills] };
       }
-      return { reply: 'Yes. I used ' + tool.label + ' in ' + work.title + '. ' + sapoFirstPerson(detail || work.description),
+      if (others.length && /\b(?:which|what) projects\b/.test(query)) {
+        const titles = new Intl.ListFormat('en').format([work.title, ...others.map(link => link.label)]);
+        return { reply: 'I used ' + tool.label + ' in ' + titles + '. The project tree shows the projects tagged with this tool.',
+          links: [sapoProjectLink(work), ...others] };
+      }
+      const lead = /^(?:what|which|where|how)\b/.test(query) ? 'I used ' : 'Yes. I used ';
+      return { reply: lead + tool.label + ' in ' + work.title + '. ' + sapoFirstPerson(detail || work.description),
         links: [sapoProjectLink(work), ...others] };
     }
     if (companyIs) {
@@ -249,23 +329,61 @@ function initSapoSearch() {
     return { reply: 'I list ' + tool.label + ' in my résumé skills. My portfolio doesn’t describe a specific project using it.', links: [skills] };
   }
 
-  return text => {
-    const query = sapoNormalize(text);
-    if (sapoPrivacy(text, query)) {
+  function respond(text) {
+    const original = sapoNormalize(text);
+    const query = repair(original);
+    if (sapoPrivacy(text, original) || sapoPrivacy(text, query)) {
       recent = undefined;
       return { reply: 'I keep personal details private. My About page covers my education and professional work.', links: [about], private: true };
     }
+
     const terms = sapoTerms(query);
     const owner = /\b(?:saurav|poudel|you|your|he|his)\b/.test(query);
-    const workQuestion = /\b(?:experience|skills?|used?|working|worked|work|built|build|building|done|study|projects?|capstone|roles?|co op|collaborat\w*|certified|certifications?|credentials?|degree|graduate|graduation|job|hire|hiring|relocat\w*|start|available|availability|tools?|toolset|stack|portfolio|resume|github|gpa)\b/.test(query);
+    const workQuestion = /\b(?:experience|skills?|use[ds]?|using|working|worked|work|built|build|building|wrote|written|done|study|school|university|attend|education|college|courses?|projects?|capstone|roles?|co op|collaborat\w*|certified|certifications?|credentials?|degree|graduate|graduation|job|hire|hiring|relocat\w*|start|available|availability|tools?|toolset|stack|portfolio|resume|github|gpa|design|proficient)\b/.test(query);
     const solicit = /^(?:tell me about|(?:can you )?show me|where can i (?:find|see|view)|can i download|walk me through|examples? of)\b/.test(query);
+    const caseLookup = /^(?:what|which|any|show me)?\s*(?:projects?|case stud(?:y|ies)|work examples?|roles?)\b.{0,36}\b(?:use[ds]?|using|with|involv\w*|for)\b/.test(query);
     const generalDefinition = /^(?:what (?:is|are|does)|define|explain|how (?:does|do i|to)|why (?:is|does))\b/.test(query);
-    const hasPortfolioFrame = (owner && (workQuestion || /\bwhat (?:did|do) (?:you|he|saurav(?: poudel)?) do\b/.test(query))) ||
-      /\b(?:in (?:the|this) portfolio|on (?:the|this) site|your resume)\b/.test(query);
-    if (/^(?:please )?(?:(?:can|could|would|will) you )?(?:write|create|make|build|code|generate|draft|calculate|translate|solve|tell me a joke|ignore)\b/.test(query)) {
+    const hasPortfolioFrame = (owner && (workQuestion || /\bwhat (?:did|do|does) (?:you|he|saurav(?: poudel)?) do\b/.test(query))) ||
+      /\b(?:in (?:the|this) portfolio|on (?:the|this) site|your resume)\b/.test(query) || caseLookup;
+    const generalRequest = /^(?:please )?(?:(?:can|could|would|will) you )?(?:write|create|make|build|code|generate|draft|calculate|translate|solve|tell me a joke|ignore)\b/.test(query);
+    const outsideTopic = !hasPortfolioFrame && /\b(?:stock price|publicly traded|sign up|who runs|ceo|download snowflake|how much does .+ cost)\b/.test(query);
+    if (generalRequest || outsideTopic) {
       recent = undefined;
       return { reply: sapoUnrelated, links: [] };
     }
+
+    const placeQuestion = /\b(?:where|what city|which city|location|located|based)\b/.test(query) && !/\b(?:gpa|rank|ranking|tuition|population|weather)\b/.test(query);
+    const campusTopic = /\b(?:university|school|college|campus)\b/.test(query);
+    if (campusTopic && /\b(?:rank|ranks|ranked|ranking|tuition|acceptance rate|enrollment size|student population)\b/.test(query)) {
+      recent = undefined;
+      return owner || sapoIncludes(query, 'university of cincinnati')
+        ? { reply: sapoSourceOnly, links: [education] }
+        : { reply: sapoUnrelated, links: [] };
+    }
+    const campusFollowup = recent && /^(?:and )?(?:where|where is (?:it|that)(?: located| based)?|what city(?: is it in)?)$/.test(query) &&
+      (recent.id === 'university' || recent.id === 'university-location' || recent.id === 'graduation-and-study');
+    let locationTopic;
+    if ((placeQuestion && campusTopic && /\b(?:his|your|saurav|university of cincinnati)\b/.test(query) && !/\b(?:work|job|role|nursing)\b/.test(query)) || campusFollowup) {
+      if (!/\b(?:study|go to|attend|enroll)\b/.test(query)) locationTopic = profile.get('university-location');
+    } else if (placeQuestion && owner && /\b(?:located|based)\b/.test(query) && !workQuestion) {
+      locationTopic = profile.get('work-and-study-location');
+    }
+    if (locationTopic) {
+      recent = locationTopic;
+      return addTree(answerRecord(locationTopic, query, terms), locationTopic);
+    }
+
+    const company = landingData.collaborators.find(([name]) => sapoIncludes(query, sapoNormalize(name)))?.[0];
+    if (company && company !== 'Delta Air Lines' && hasPortfolioFrame && /\b(?:(?:work|worked|working) (?:for|with|at)|collaborat\w* with|employer)\b/.test(query)) {
+      recent = undefined;
+      if (company === 'IBM') {
+        const project = landingData.projects.find(item => item.title === 'Salesforce Catering Connect');
+        return addTree({ reply: 'I collaborated with IBM on Salesforce Catering Connect during my Delta Air Lines co-op.', links: [sapoProjectLink(project), collaborators] });
+      }
+      return addTree({ reply: 'My résumé lists ' + company + ' as a collaborator. See my work history for my roles.', links: [collaborators, history] });
+    }
+
+    const matchIntent = matchIntents(terms);
     const ranked = records.map(record => {
       const matched = record.phrases.filter(phrase => sapoIncludes(query, phrase));
       const exact = matched.reduce((best, phrase) => Math.max(best, phrase.split(' ').length), 0);
@@ -273,47 +391,97 @@ function initSapoSearch() {
       const subject = record.kind === 'project' || record.kind === 'role' || record.kind === 'creative-work';
       const titleScore = overlap(terms, record.titleTerms);
       const factScore = overlap(terms, record.factTerms);
-      const score = exact * 6 + titleScore + factScore * .55 + (whole ? 12 : 0) + (record.kind === 'profile' && exact ? 4 : 0);
-      return { record, exact, whole, subject, titleScore, factScore, score };
+      const intent = matchIntent(record);
+      const preference = Math.max(0, ...record.links.map(({ href }) => preferences.get(href) || 0));
+      const score = exact * 6 + titleScore + factScore * .45 + intent * 4 +
+        (whole ? 12 : 0) + (record.kind === 'profile' && exact ? 4 : 0) + (titleScore ? preference * .7 : 0);
+      return { record, exact, whole, subject, titleScore, factScore, intent, score };
     }).sort((first, second) => second.score - first.score);
     const namedProject = ranked.find(candidate => candidate.record.kind === 'project' && candidate.exact >= 1)?.record.item;
-    const toolName = toolNames.find(name => sapoIncludes(query, name));
-    const strongest = ranked[0];
+    const namedTools = [];
+    for (const name of toolNames) {
+      if (sapoIncludes(query, name) && !namedTools.some(prior => tools.get(prior) === tools.get(name) || sapoIncludes(prior, name))) namedTools.push(name);
+      if (namedTools.length === 2) break;
+    }
+    const [toolName] = namedTools;
+    const tool = tools.get(toolName);
     const matchingProfile = ranked.find(candidate => candidate.record.kind === 'profile' &&
       (candidate.whole || candidate.exact >= 2) && (owner || hasPortfolioFrame || candidate.whole || solicit || candidate.exact >= 3));
+    const toolFollowup = recent && /^(?:and |what about |how about )/.test(query);
 
-    if (toolName && (query === toolName || hasPortfolioFrame || (solicit && workQuestion)) &&
+    if (tool && (query === toolName || hasPortfolioFrame || toolFollowup || (solicit && workQuestion)) &&
         !/\b(?:certified|certifications?|credential|badge|github profile|your github)\b/.test(query) &&
-        (!matchingProfile || namedProject || /\b(?:experience|used?|tools?|worked with|tech stack)\b/.test(query))) {
-      const answer = answerTool(toolName, tools.get(toolName), query, terms, namedProject);
-      if (/^(?:Yes\.|I (?:list|use|used|built))/.test(answer.reply)) {
-        recent = records.find(record => (record.kind === 'project' || record.kind === 'role') && record.links[0].href === answer.links[0].href);
-      } else {
-        recent = undefined;
+        (!matchingProfile || namedProject || caseLookup || /\b(?:experience|use[ds]?|tools?|worked with|tech stack)\b/.test(query))) {
+      const answer = answerTool(toolName, tool, query, terms, namedProject);
+      recent = answer.links.map(({ href }) => sources.get(href)).find(record => record?.kind === 'project' || record?.kind === 'role');
+      if (namedTools.length === 2 && /\b(?:and|or|both)\b/.test(query)) {
+        const secondTool = tools.get(namedTools[1]);
+        const second = answerTool(namedTools[1], secondTool, query, terms, namedProject);
+        const sameProject = recent?.kind === 'project' && /^I used |^Yes\. I used /.test(answer.reply) &&
+          /^I used |^Yes\. I used /.test(second.reply) && answer.links[0].href === second.links[0].href;
+        if (sameProject) {
+          return addTree({ reply: 'I used ' + tool.label + ' and ' + secondTool.label + ' in ' + recent.title + '. ' + recent.answer,
+            links: [answer.links[0]] }, recent);
+        }
+        const links = [answer.links[0], second.links[0]];
+        return addTree({ reply: answer.reply + '\n\n' + second.reply, links }, recent, tool);
       }
-      return answer;
+      return addTree(answer, recent, tool);
     }
+
     const followup = /^(?:and )?(?:what (?:were the |was the )?(?:tools|stack|technologies|results|metrics|impact|else)|how (?:many|much)|how did you (?:do|build) that|can you elaborate|tell me more|more details)\b/.test(query);
+    const disambiguate = /\b(?:skills?|experience|projects?) (?:with|in|using)\b/.test(query);
     const candidate = ranked.find(item => item.whole ||
-      (item.exact > 0 && (hasPortfolioFrame || solicit ||
-        item.subject || (owner && item.exact >= 2) || (item.record.kind === 'profile' && item.exact >= 3))) ||
-      (hasPortfolioFrame && !(recent && followup && terms.size <= 3) && item.factScore >= 4.5 && item.titleScore + item.factScore >= 7.5));
-    if (generalDefinition && toolName && !hasPortfolioFrame && candidate?.exact === 1 && !candidate.whole) {
+      (item.exact > 0 && (hasPortfolioFrame || solicit || item.subject || (owner && item.exact >= 2) ||
+        (item.record.kind === 'profile' && item.exact >= 3))) ||
+      (hasPortfolioFrame && item.titleScore > 0 && item.intent >= .72 && !(recent && followup && terms.size <= 3)));
+    if (generalDefinition && tool && !hasPortfolioFrame && candidate?.exact === 1 && !candidate.whole) {
       recent = undefined;
       return { reply: sapoUnrelated, links: [] };
     }
-    if (candidate && (!generalDefinition || hasPortfolioFrame || candidate.whole || candidate.subject || matchingProfile || (owner && candidate.exact >= 2))) {
+    const genericMatch = disambiguate && candidate?.record.kind === 'section' && !candidate.whole && candidate.exact < 2;
+    if (candidate && !genericMatch && (!generalDefinition || hasPortfolioFrame || candidate.whole || candidate.subject || matchingProfile || (owner && candidate.exact >= 2))) {
       recent = candidate.record;
-      return answerRecord(recent, query, terms);
+      return addTree(answerRecord(recent, query, terms), recent);
     }
-    if (recent && followup && terms.size <= 3) {
-      return answerRecord(recent, query, terms);
-    }
+    if (recent && followup && terms.size <= 3) return addTree(answerRecord(recent, query, terms), recent);
+
     recent = undefined;
-    if (hasPortfolioFrame && !/\b(?:ignore|instructions|pretend|act as)\b/.test(query)) {
-      const related = strongest?.exact ? strongest.record.links : /\b(?:skills?|tools?|used?|stack|experience with)\b/.test(query) ? [skills] : [history, projects];
-      return { reply: 'I don’t have enough information in my portfolio to confirm that. Here’s where you can see what I’ve documented.', links: related };
+    if ((hasPortfolioFrame || (solicit && (campusTopic || workQuestion))) && !/\b(?:ignore|instructions|pretend|act as|work out|working out)\b/.test(query)) {
+      const evidenceRecord = ranked.find(item => item.titleScore > 0 && item.factScore >= 4 && item.intent >= .4)?.record;
+      let links;
+      if (campusTopic || /\b(?:degree|coursework|courses?|study|graduate|graduation|education)\b/.test(query)) links = [education];
+      else if (evidenceRecord) links = evidenceRecord.links;
+      else if (/\b(?:design|photography|videography|animation|creative)\b/.test(query)) links = [creative];
+      else if (/\b(?:skills?|tools?|use[ds]?|stack|proficient|experience (?:with|in))\b/.test(query)) links = [skills];
+      else if (/\b(?:projects?|case stud(?:y|ies)|build|built)\b/.test(query)) links = [projects];
+      else links = [history];
+      return addTree({ reply: sapoSourceOnly, links }, evidenceRecord);
     }
     return { reply: sapoUnrelated, links: [] };
+  }
+
+  // Learn from the source the visitor actually opens. Store only validated portfolio links, never questions.
+  respond.rememberSource = href => {
+    let source = href.replace(/#project-tree$/, '#works');
+    if (recent?.kind === 'project' && recent.item.tools.some(label => sapoTreeLink('tool', label).href === href)) {
+      source = recent.links[0].href;
+    }
+    const record = sources.get(source);
+    if (!record) return;
+    recent = record;
+    const count = Math.min(3, (preferences.get(source) || 0) + 1);
+    preferences.delete(source);
+    preferences.set(source, count);
+    if (preferences.size > 12) preferences.delete(preferences.keys().next().value);
+    try { storage?.setItem(sessionKey, JSON.stringify([...preferences])); } catch { /* Session storage is optional. */ }
   };
+  respond.followups = () => {
+    if (recent?.kind === 'project') return ['What tools did you use?', 'What were the results?', 'Tell me more'];
+    if (recent?.kind === 'role') return ['Tell me more', 'What did you do at Delta?', 'What projects have you built?'];
+    if (recent?.id === 'current-work') return ['What do you do at the College of Nursing?', 'What did you do as a Resident Advisor?'];
+    if (recent?.id === 'university' || recent?.id === 'university-location' || recent?.id === 'graduation-and-study') return ['Where is it located?', 'When do you graduate?', 'When can you start?'];
+    return [];
+  };
+  return respond;
 }

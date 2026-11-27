@@ -100,22 +100,24 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline: 2px solid 
 .contact-row a { display: block; overflow-wrap: anywhere; font-size: .83rem; text-underline-offset: .18em; }
 .contact-row button { border: 1px solid var(--stroke); border-radius: 999px; padding: .15rem .42rem; font: .56rem/1.7 var(--display); background: var(--dark); }
 .contact-row button:hover { border-color: var(--text); }
-.ask-panel { width: min(32.5rem, calc(100vw - 1rem)); margin: 0 auto .58rem; border-radius: 1.1rem; overflow: hidden; animation: panel-in .24s ease both; }
+.ask-panel { display: flex; flex-direction: column; width: min(32.5rem, calc(100vw - 1rem)); max-height: calc(100dvh - var(--dock-height) - 3rem); margin: 0 auto .58rem; border-radius: 1.1rem; overflow: hidden; animation: panel-in .24s ease both; }
 @keyframes panel-in { from { opacity: 0; transform: translateY(8px); } }
-#conversation { max-height: min(34vh, 17rem); overflow: auto; }
+#conversation { min-height: 0; max-height: min(42dvh, 19rem); overflow: auto; overscroll-behavior: contain; }
 #conversation:empty { display: none; }
 .message { margin: .6rem .8rem; padding: .55rem .7rem; background: var(--background); border-radius: .6rem; overflow-wrap: anywhere; font-size: .9rem; }
 .message.user { margin-left: 18%; background: var(--dark); }
 .message.guide { white-space: pre-wrap; }
 .message-sources { display: flex; flex-wrap: wrap; gap: .35rem .9rem; margin-top: .55rem; font-size: .85em; }
+.message-sources a { padding-block: .2rem; }
 .message a { text-underline-offset: .19em; }
-.suggestions { padding: .72rem .8rem; display: flex; flex-wrap: wrap; gap: .35rem; }
+.suggestions { flex: none; padding: .72rem .8rem; display: flex; flex-wrap: wrap; gap: .35rem; max-height: 6rem; overflow: auto; }
 .suggestions button { padding: .25rem .55rem; border: 1px solid var(--stroke); border-radius: 999px; background: var(--dark); font-size: .77rem; }
 .suggestions button:hover { background: var(--background); }
-#ask-form { display: flex; align-items: center; gap: .35rem; padding: .28rem .38rem; border-top: 1px solid var(--stroke); }
+#ask-form { flex: none; display: flex; align-items: center; gap: .35rem; padding: .28rem .38rem; border-top: 1px solid var(--stroke); }
 #question { flex: 1; min-width: 0; border: 0; padding: .45rem .2rem; background: transparent; }
 #question::placeholder { color: var(--text); opacity: .85; }
 #question:focus-visible { outline-offset: 0; }
+@media (pointer: coarse) { #question { font-size: 1rem; } }
 .icon-button { border: 1px solid transparent; background: transparent; border-radius: 50%; width: 2rem; height: 2rem; flex: none; line-height: 1; }
 .icon-button:hover, .send { background: var(--dark); border-color: var(--stroke); }
 dialog { width: min(38rem, calc(100% - 1.5rem)); max-height: min(80vh, 48rem); border: 1px solid var(--stroke); border-radius: 1rem; background: var(--light); color: var(--text); padding: 0; }

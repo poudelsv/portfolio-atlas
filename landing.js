@@ -8,7 +8,9 @@ const suggestedQuestions = [
   'What AI work have you done?',
   'Show me your creative work',
 ];
-const answerPortfolioQuestion = initSapoSearch();
+let chatStorage;
+try { chatStorage = window.sessionStorage; } catch { /* Chat still works with storage disabled. */ }
+const answerPortfolioQuestion = initSapoSearch(chatStorage);
 const get = id => document.getElementById(id);
 const dialog = get('detail');
 const askPanel = get('ask-panel');
@@ -38,7 +40,11 @@ function initProfile() {
     get('intro').textContent = landingData.intro;
     get('role').textContent = landingData.roles.join(' · ');
   }
-  get('suggestions').replaceChildren(...suggestedQuestions.map(prompt => {
+  renderSuggestions(suggestedQuestions);
+}
+
+function renderSuggestions(prompts) {
+  get('suggestions').replaceChildren(...prompts.map(prompt => {
     const button = make('button', prompt);
     button.type = 'button';
     button.addEventListener('click', () => ask(prompt));
@@ -154,14 +160,19 @@ function ask(value) {
   const message = addMessage(answer.reply, 'guide');
   if (answer.links.length) {
     const sources = make('span', '', 'message-sources');
-    for (const { label, href } of answer.links.slice(0, 3)) {
+    for (const { label, href } of answer.links) {
       const link = make('a', label);
       link.href = href;
-      link.addEventListener('click', () => setAsk(false, false));
+      link.addEventListener('click', () => {
+        answerPortfolioQuestion.rememberSource(href);
+        setAsk(false, false);
+      });
       sources.append(link);
     }
     message.append(sources);
   }
+  const followups = answerPortfolioQuestion.followups();
+  renderSuggestions(followups.length ? followups : suggestedQuestions);
   question.value = '';
   question.focus();
   conversation.scrollTop = conversation.scrollHeight;
