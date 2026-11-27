@@ -15,8 +15,8 @@ document.body.insertAdjacentHTML('beforeend', `
     </section>
     <div class="dock-row">
       <canvas class="sapo-nav-earth" aria-hidden="true"></canvas>
-      <button class="ask-toggle" id="ask-toggle" aria-controls="ask-panel" aria-expanded="false" aria-label="Ask sapo" title="Ask sapo" type="button">
-        <span class="sapo-wordmark" aria-hidden="true">sapo</span>
+      <button class="ask-toggle" id="ask-toggle" aria-controls="ask-panel" aria-expanded="false" aria-label="Ask .sapo" title="Ask .sapo" type="button">
+        <span class="sapo-wordmark" aria-hidden="true">.sapo</span>
       </button>
       <div class="dock-shell">
         <section class="contact-panel" id="contact-panel" aria-label="Contact Saurav" hidden>

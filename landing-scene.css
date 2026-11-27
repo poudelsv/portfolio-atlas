@@ -1,0 +1,126 @@
+body[data-page="about"] #profile-name {
+  font-size: 27cqi;
+  font-weight: 900;
+  letter-spacing: -.055em;
+}
+
+.landing-introduction:focus { outline: none; }
+.landing-introduction .profile { padding-block: clamp(1.25rem, 4.5vw, 3.6rem) clamp(3rem, 8vw, 6.75rem); }
+
+.landing-scene {
+  position: relative;
+  isolation: isolate;
+  width: 100%;
+  aspect-ratio: 2364 / 1330;
+  margin: 0;
+  overflow: hidden;
+  background: #171d64;
+  mask-image: linear-gradient(to bottom, transparent, #000 18%, #000 86%, transparent);
+}
+
+.landing-sky, .landing-atmosphere, .landing-landscape {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  pointer-events: none;
+}
+
+.landing-sky { height: 80%; filter: brightness(.72) saturate(1.08); }
+.landing-landscape { height: 100%; object-fit: cover; }
+.landing-atmosphere {
+  height: 100%;
+  transform: translate(var(--drift-x, 0), var(--drift-y, 0));
+  transition: transform .65s cubic-bezier(.2, .7, .35, 1);
+}
+
+.landing-orbit {
+  position: absolute;
+  inset: 24% 34% 52% 25%;
+  border: 1px solid #e6e1ff4d;
+  border-radius: 50%;
+  transform: rotate(-19deg);
+}
+
+.landing-orbit-wide {
+  inset: 20% 20% 51% 34%;
+  opacity: .57;
+  transform: rotate(11deg);
+}
+
+.landing-orbit span {
+  position: absolute;
+  width: clamp(3px, .4vw, 7px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: #eee8ff;
+  box-shadow: 0 0 .5rem #c6b8fb;
+  offset-path: ellipse(50% 50% at 50% 50%);
+  animation: landscape-orbit 19s linear infinite paused;
+}
+
+.landing-orbit-wide span { animation-duration: 27s; animation-delay: -10s; }
+@keyframes landscape-orbit { to { offset-distance: 100%; } }
+
+.landing-meteor {
+  position: absolute;
+  top: 36%;
+  left: 66%;
+  width: clamp(.7rem, 6vw, 6rem);
+  height: 1px;
+  opacity: 0;
+  background: linear-gradient(90deg, #fff, #d7ccff45 45%, transparent);
+  animation: landscape-meteor 10s -3s linear infinite paused;
+}
+
+.landing-meteor-far { top: 26%; left: 49%; animation-delay: -7.2s; animation-duration: 13s; }
+@keyframes landscape-meteor {
+  0%, 60% { opacity: 0; transform: translate(6vw, -3vw) rotate(-23deg); }
+  64% { opacity: .7; }
+  71%, 100% { opacity: 0; transform: translate(-13vw, 5vw) rotate(-23deg); }
+}
+
+.landing-scene-wave {
+  position: absolute;
+  top: 50%;
+  left: 45%;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  translate: -50% -50%;
+  color: #fff;
+  background: transparent;
+  border: 0;
+  border-radius: 50%;
+  touch-action: manipulation;
+}
+
+.landing-wave-marker {
+  font-size: clamp(1.05rem, 2.1vw, 2.2rem);
+  line-height: 1;
+  text-shadow: 0 0 .8rem #dbd0ff;
+  animation: landscape-glint 4.6s ease-in-out infinite paused;
+}
+
+.landing-scene-wave:is(:hover, :focus-visible) .landing-wave-marker { opacity: 1; animation: none; }
+.landing-scene.is-visible :is(.landing-meteor, .landing-orbit span, .landing-wave-marker) { animation-play-state: running; }
+.landing-scene.is-entered .landing-atmosphere { animation: landscape-arrive .9s ease-out both; }
+
+@keyframes landscape-glint {
+  0%, 100% { opacity: .53; scale: .86; }
+  46% { opacity: .96; scale: 1; }
+}
+
+@keyframes landscape-arrive { from { opacity: 0; } }
+
+@media (max-width: 520px) {
+  .landing-orbit { border-color: #e6e1ff55; }
+  .landing-introduction .profile { padding-top: .8rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing-scene :is(.landing-meteor, .landing-orbit span, .landing-wave-marker, .landing-atmosphere) { animation: none; }
+  .landing-atmosphere { transform: none; }
+}
