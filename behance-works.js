@@ -1,3 +1,10 @@
+const creativeToolsets = {
+  photography: ['Adobe Creative Cloud', 'Lightroom', 'Photoshop'],
+  videography: ['Adobe Creative Cloud', 'Premiere Pro', 'After Effects', 'DaVinci Resolve', 'Final Cut Pro'],
+  modeling: ['Blender', 'Autodesk Maya', 'After Effects', 'Unity', 'Unreal Engine'],
+  design: ['Adobe Creative Cloud', 'Illustrator', 'Photoshop', 'InDesign'],
+};
+
 const behanceWorks = {
   photography: [
     {

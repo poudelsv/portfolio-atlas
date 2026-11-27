@@ -312,22 +312,6 @@ function initResume() {
     setPlaying(playing);
   }
 
-  const organizations = [
-    ['Fiverr', 'companies/fiverr.svg', 'reverse'],
-    ['Upwork', 'companies/upwork.svg'],
-    ['Delta Air Lines', 'delta-light.svg'],
-    ['LSG Sky Chefs', 'companies/lsg.png', 'lsg'],
-    ['IBM', 'companies/ibm.svg', 'light'],
-    ['Gate Gourmet', 'companies/gate-gourmet.svg'],
-    ['Newrest', 'companies/newrest.png'],
-    ['DO & CO', 'companies/do-and-co.png'],
-    ['Unifi', 'companies/unifi.png'],
-    ['VRPatients', 'companies/vrpatients.png'],
-    ['Palantir', 'companies/palantir.svg', 'light'],
-    ['Salesforce', 'companies/salesforce.svg'],
-    ['FAA', 'companies/faa.svg?v=dark'],
-    ['TSA', 'companies/tsa.svg'],
-  ];
   const collaborators = element('section', '', 'resume-companies');
   collaborators.id = 'resume-companies';
   const collaboratorsHeading = element('h3', 'Companies I worked and collaborated with');
@@ -335,7 +319,7 @@ function initResume() {
   collaborators.setAttribute('aria-labelledby', collaboratorsHeading.id);
   const marks = element('ul', '', 'resume-company-list');
   marks.setAttribute('role', 'list');
-  for (const [name, path, treatment] of organizations) {
+  for (const [name, path, treatment] of landingData.collaborators) {
     const item = element('li');
     const logo = element('img', '', treatment ? 'resume-company-' + treatment : '');
     logo.alt = name;
@@ -359,6 +343,7 @@ function initResume() {
     const work = element('ol', '', 'resume-history-list');
     for (const role of experience) {
       const job = element('li', '', 'resume-history-entry');
+      job.id = 'resume-role-' + sapoSlug(role.title);
       if (role.dates) job.append(element('p', role.dates, 'history-date'));
       job.append(element('h4', role.title), element('p', role.organization, 'history-company'));
       if (role.highlights?.length) job.append(list('ul', role.highlights, 'history-responsibilities'));
@@ -372,11 +357,13 @@ function initResume() {
   const credentials = element('div', '', 'resume-credentials');
   if (education) {
     const study = element('section', '', 'credential credential-education');
+    study.id = 'resume-education';
     study.append(
       element('h3', 'Education'),
       element('h4', education.school),
       element('p', education.degree),
       element('p', education.focus),
+      element('p', education.studies),
       element('p', [education.graduation && 'Expected ' + education.graduation, education.location].filter(Boolean).join(' · '), 'credential-meta'),
     );
     if (education.gpa) study.append(element('p', 'GPA ' + education.gpa, 'credential-meta'));
@@ -384,6 +371,7 @@ function initResume() {
   }
   if (skills.length) {
     const skill = element('section', '', 'credential credential-skills');
+    skill.id = 'resume-skills';
     const groups = element('div', '', 'credential-skill-grid');
     for (const group of skills) {
       const category = element('div');
@@ -397,6 +385,7 @@ function initResume() {
   for (const [label, items] of [['Honors', honors.filter(item => !certifications.includes(item))], ['Certifications', certifications]]) {
     if (!items.length) continue;
     const group = element('section', '', 'credential');
+    group.id = 'resume-' + label.toLowerCase();
     const entries = list('ul', items, 'credential-honors');
     for (const entry of entries.children) {
       const url = landingData.certificationLinks?.[entry.textContent];
@@ -429,4 +418,11 @@ function initResume() {
 
   section.append(pdf);
   initResumePdf(preview, pdfPath);
+
+  if (location.hash && performance.getEntriesByType('navigation')[0]?.type !== 'back_forward') {
+    addEventListener('DOMContentLoaded', () => {
+      const target = document.getElementById(location.hash.slice(1));
+      if (target && section.contains(target)) target.scrollIntoView({ block: 'start', behavior: 'instant' });
+    }, { once: true });
+  }
 }
