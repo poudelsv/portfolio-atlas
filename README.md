@@ -26,10 +26,12 @@ The site runs directly from `dist/`. A modern browser supports the Canvas animat
 | [Résumé](dist/resume.html) | Scrub through a career timeline, browse work history and collaborators, and view or download the PDF résumé. |
 | [Projects](dist/projects.html) | Filter work by field, browse project cards, and open case studies with tools, contributions, and reported outcomes. An interactive relationship map connects fields, projects, and tools. |
 | [Creative Projects](dist/creative.html) | Explore photography, videography, 3D modeling and animation, and graphic design galleries. Published work links to Behance, and example slides are labeled as sample studies. |
-| Ask Sapo AI and Contact | Open the shared Earth-textured dock to ask the browser-based, rule-based assistant about projects and career details or access contact links. |
+| Ask Sapo AI and Contact | Open the shared dock to browse professional answers, ask general questions, or access contact links. |
 | `.sapo` companion | Follow a portrait-based character that rides a momo during scrolling and pointer movement, offers occasional speech bubbles, and reacts to clicks. Three quick clicks trigger a ghost animation followed by revival. |
 
 Planetary covers and the starfield are drawn in Canvas. Reduced-motion preferences turn off page morphs, companion following, and automatic résumé playback.
+
+Sapo answers portfolio questions from the curated FAQ and project data. The first general question loads an approximately 137 MB model, which runs in a browser worker. A supported browser can cache the model for later visits. Chat messages stay on the device. The site requires no API key or inference server. [SmolLM2-135M-Instruct](https://huggingface.co/HuggingFaceTB/SmolLM2-135M-Instruct), [Transformers.js](https://huggingface.co/docs/transformers.js/en/pipelines)
 
 ## Edit the portfolio
 
@@ -38,7 +40,8 @@ Planetary covers and the starfield are drawn in Canvas. Reduced-motion preferenc
 | [`dist/landing-data.js`](dist/landing-data.js) | Introduction, contact details, work history, skills, and case studies. Keep each project’s field and tool tags current so the relationship map reflects the project data. |
 | [`dist/resume.js`](dist/resume.js) | Career timeline and collaborator logo presentation. Replace [the bundled résumé PDF](dist/assets/Saurav-Poudel-Resume.pdf) when updating the downloadable version. |
 | [`dist/creative.js`](dist/creative.js) and [`dist/behance-works.js`](dist/behance-works.js) | Gallery content, sample frames, toolsets, and published work links. Place local gallery media in [`dist/assets/creative/`](dist/assets/creative/). |
-| [`dist/landing.js`](dist/landing.js) | Assistant responses, contact panel, and project case-study dialogs. |
+| [`dist/landing.js`](dist/landing.js) | Chat routing, contact panel, and project case-study dialogs. |
+| [`dist/sapo-faq.js`](dist/sapo-faq.js) and [`dist/sapo-ai-worker.js`](dist/sapo-ai-worker.js) | Curated professional Q&A and local AI model configuration. |
 | [`dist/sapo-buddy.js`](dist/sapo-buddy.js) and [`dist/sapo-buddy.css`](dist/sapo-buddy.css) | Companion movement, occasional messages, click reactions, and the momo ride. |
 | [`dist/earth.js`](dist/earth.js), [`dist/planets.js`](dist/planets.js), and [`dist/solar.css`](dist/solar.css) | Procedural planetary covers, shared view transitions, and layout. |
 
@@ -47,3 +50,4 @@ Planetary covers and the starfield are drawn in Canvas. Reduced-motion preferenc
 - League Spartan and PDF.js ship with their license files. [League Spartan Open Font License](dist/fonts/LeagueSpartan-OFL.txt), [PDF.js license](dist/vendor/pdfjs/LICENSE)
 - The résumé includes employer and collaborator marks. [University of Cincinnati](https://www.uc.edu/about/marketing-communications/brand-guide/logos-marks.html), [Delta Air Lines](https://commons.wikimedia.org/wiki/File:Delta_logo.svg), [Fiverr](https://commons.wikimedia.org/wiki/File:Fiverr_logo.svg), [Upwork](https://commons.wikimedia.org/wiki/File:Upwork_Logo.svg), [LSG Sky Chefs](https://www.lsgskychefs.com/), [IBM](https://www.ibm.com/design/language/ibm-logos/8-bar/), [Gate Gourmet](https://gategroup.com/our-brands/gategourmet/), [DO & CO](https://www.doco.com/), [Unifi](https://unifiservice.com/services/aviation/), [VRPatients](https://vrpatients.com/about-us/), [Palantir](https://commons.wikimedia.org/wiki/File:Palantir_Technologies_logo.svg), [Salesforce](https://www.salesforce.com/news/salesforce-logo/), [FAA](https://www.faa.gov/), [TSA](https://commons.wikimedia.org/wiki/File:Transportation_Security_Administration_seal.svg)
 - The photography and videography sample frames credit their NASA source material in the galleries. The supplied plane-and-clouds reference illustration credits Ryo Takemasa.
+- The white Newrest mark is from the company’s media kit. [Newrest press and media library](https://media.newrest.eu/press-and-media-library/)

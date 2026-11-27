@@ -1,13 +1,13 @@
 const landingData = {
-  intro: 'I’m a senior at the University of Cincinnati graduating in May 2027. I build data pipelines and software that help people make decisions, from airline operations to healthcare workflows.',
-  roles: ['Data Engineering', 'Software', 'Applied AI'],
+  intro: 'I’m a senior at the University of Cincinnati graduating in May 2027. I build data pipelines, software, and machine learning tools that help people make decisions in airline operations and healthcare.',
+  roles: ['Data Engineering', 'Software', 'Machine Learning & Applied AI'],
   education: {
     school: 'University of Cincinnati',
     degree: 'B.S. in Information Technology',
     focus: 'AI, Data Science, and Software Engineering',
     graduation: 'May 2027',
     location: 'Cincinnati, OH',
-    gpa: '3.85 / 4.0',
+    gpa: '3.91 / 4.0',
   },
   contact: {
     email: "poudelsv@mail.uc.edu",
@@ -454,5 +454,8 @@ const landingData = {
     'Six Sigma Lean White Belt · Delta Air Lines',
     'Neo4j Fundamentals · July 2025',
   ],
+  certificationLinks: {
+    'Salesforce Certified Agentforce Specialist': 'https://www.salesforce.com/trailblazer/mfcp0hfko9sbtpd395',
+  },
   github: 'https://github.com/poudelsv',
 };

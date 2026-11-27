@@ -8,8 +8,8 @@ document.body.insertAdjacentHTML('beforeend', `
       <div class="suggestions" id="suggestions"></div>
       <form id="ask-form">
         <button class="icon-button close-ask" id="close-ask" type="button" aria-label="Close Sapo panel">×</button>
-        <label class="sr-only" for="question">Question about Saurav</label>
-        <input id="question" type="text" maxlength="300" placeholder="Ask Sapo about Saurav…" autocomplete="off" required>
+        <label class="sr-only" for="question">Portfolio or general question</label>
+        <input id="question" type="text" maxlength="400" placeholder="Ask about work or any general topic…" autocomplete="off" required>
         <button class="icon-button send" type="submit" aria-label="Send question">↑</button>
       </form>
     </section>
