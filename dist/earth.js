@@ -93,7 +93,8 @@
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
     const isLoader = mode === 'loader';
-    const isDock = mode === 'dock';
+    const isSky = mode === 'sky';
+    const isStrip = mode === 'dock' || isSky;
     const raster = document.createElement('canvas');
     const graphics = raster.getContext('2d');
     let image;
@@ -106,15 +107,15 @@
     function resize() {
       const size = canvas.getBoundingClientRect();
       if (!size.width || !size.height) return;
-      const ratio = Math.min(devicePixelRatio || 1, 2);
+      const ratio = isSky ? Math.min(devicePixelRatio || 1, 1.5, 1440 / size.width) : Math.min(devicePixelRatio || 1, 2);
       canvas.width = Math.round(size.width * ratio);
       canvas.height = Math.round(size.height * ratio);
 
-      const side = isDock ? Math.min(canvas.width, 340) : Math.min(canvas.width, canvas.height, isLoader ? 160 : 570);
-      const width = isDock ? Math.max(1, Math.round(side * .82)) : side;
-      const height = isDock ? Math.max(1, Math.round(width * canvas.height / canvas.width)) : side;
+      const side = isStrip ? Math.min(canvas.width, isSky ? 460 : 340) : Math.min(canvas.width, canvas.height, isLoader ? 160 : 570);
+      const width = isStrip ? Math.max(1, Math.round(side * .82)) : side;
+      const height = isStrip ? Math.max(1, Math.round(width * canvas.height / canvas.width)) : side;
       const originX = (side - width) / 2;
-      const originY = isDock ? side * .445 - height / 2 : 0;
+      const originY = isStrip ? side * .445 - height / 2 : 0;
       raster.width = width;
       raster.height = height;
       image = graphics.createImageData(width, height);
@@ -161,7 +162,7 @@
       }
       graphics.putImageData(image, 0, 0);
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      if (isDock) {
+      if (isStrip) {
         ctx.drawImage(raster, 0, 0, canvas.width, canvas.height);
         return;
       }
@@ -206,5 +207,6 @@
 
   createGlobe(document.getElementById('earth'), 'hero');
   createGlobe(document.getElementById('loader-earth'), 'loader');
+  createGlobe(document.getElementById('landing-sky'), 'sky');
   window.mountEarthDock = canvas => createGlobe(canvas, 'dock');
 })();
