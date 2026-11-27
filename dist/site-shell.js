@@ -3,11 +3,11 @@
 document.body.insertAdjacentHTML('beforeend', `
   <div class="dock">
     <section class="ask-panel" id="ask-panel" aria-labelledby="ask-title" hidden>
-      <h2 class="sr-only" id="ask-title">sapo.ai</h2>
+      <h2 class="sr-only" id="ask-title">sapo</h2>
       <div id="conversation" role="log" aria-live="polite" aria-label="Conversation"></div>
       <div class="suggestions" id="suggestions"></div>
       <form id="ask-form">
-        <button class="icon-button close-ask" id="close-ask" type="button" aria-label="Close sapo.ai">×</button>
+        <button class="icon-button close-ask" id="close-ask" type="button" aria-label="Close sapo">×</button>
         <label class="sr-only" for="question">Ask about Saurav</label>
         <input id="question" type="text" maxlength="400" placeholder="Ask about my work, skills, or projects…" autocomplete="off" required>
         <button class="icon-button send" type="submit" aria-label="Send question">↑</button>
@@ -15,8 +15,8 @@ document.body.insertAdjacentHTML('beforeend', `
     </section>
     <div class="dock-row">
       <canvas class="sapo-nav-earth" aria-hidden="true"></canvas>
-      <button class="ask-toggle" id="ask-toggle" aria-controls="ask-panel" aria-expanded="false" aria-label="Ask sapo.ai" title="Ask sapo.ai" type="button">
-        <span class="sapo-wordmark" aria-hidden="true">sapo.ai</span>
+      <button class="ask-toggle" id="ask-toggle" aria-controls="ask-panel" aria-expanded="false" aria-label="Ask sapo" title="Ask sapo" type="button">
+        <span class="sapo-wordmark" aria-hidden="true">sapo</span>
       </button>
       <div class="dock-shell">
         <section class="contact-panel" id="contact-panel" aria-label="Contact Saurav" hidden>

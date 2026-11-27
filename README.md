@@ -26,12 +26,12 @@ The site runs directly from `dist/`. A modern browser supports the Canvas animat
 | [Résumé](dist/resume.html) | Scrub through a career timeline, browse work history and collaborators, and view or download the PDF résumé. |
 | [Projects](dist/projects.html) | Filter work by field, browse project cards, and open case studies with tools, contributions, and reported outcomes. An interactive relationship map connects fields, projects, and tools. |
 | [Creative Projects](dist/creative.html) | Explore photography, videography, 3D modeling and animation, and graphic design galleries. Published work links to Behance, and example slides are labeled as sample studies. |
-| sapo.ai and Contact | Ask questions about Saurav’s professional work in the shared dock and follow links to the relevant case study, résumé entry, or gallery. |
+| sapo and Contact | Ask questions about Saurav’s professional work in the shared dock and follow links to the relevant case study, résumé entry, or gallery. |
 | `.sapo` companion | Follow a portrait-based character that rides a momo during scrolling and pointer movement, offers occasional speech bubbles, and reacts to clicks. Three quick clicks trigger a ghost animation followed by revival. |
 
 Planetary covers and the starfield are drawn in Canvas. Reduced-motion preferences turn off page morphs, companion following, and automatic résumé playback.
 
-sapo.ai ranks questions against the portfolio’s projects, role descriptions, skills, credentials, creative work, and first-person question examples. It builds its search index in the browser and links answers to the source material. Unrelated questions get a short redirect. Chat messages stay on the device and the site requires no API key, model download, or inference server.
+`sapo` ranks questions against the portfolio’s projects, role descriptions, skills, credentials, creative work, and first-person question examples. It builds its search index in the browser and links answers to the source material. Unrelated questions get a short redirect. Chat messages stay on the device and the site requires no API key, model download, or inference server.
 
 Run `node --test tests/sapo-search.test.cjs` to verify answer routing, privacy handling, and source links.
 

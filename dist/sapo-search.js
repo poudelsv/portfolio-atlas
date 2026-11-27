@@ -93,8 +93,8 @@ function initSapoSearch() {
   addRecord({ title: 'Using the portfolio', kind: 'section',
     answer: 'I organized this site into About, Resume, Projects, and Creative Projects. You can filter work by field and select a project to see its tools, contributions, and results.', links: [about, projects, creative] },
     ['website', 'portfolio website', 'how do i use this site', 'project relationship map', 'who made this website', 'who built this site']);
-  addRecord({ title: 'sapo.ai', kind: 'section', answer: 'This is my portfolio assistant. It answers in my voice using my résumé, case studies, and creative work.',
-    links: [about, projects] }, ['what is sapo ai', 'how does sapo ai work', 'are you a chatbot']);
+  addRecord({ title: 'sapo', kind: 'section', answer: 'This is my portfolio assistant. It answers in my voice using my résumé, case studies, and creative work.',
+    links: [about, projects] }, ['what is sapo', 'how does sapo work', 'what is sapo ai', 'how does sapo ai work', 'are you a chatbot']);
   addRecord({ title: 'Résumé PDF', kind: 'section', answer: 'You can preview or download my résumé PDF from the Résumé page.',
     links: [{ label: 'Résumé PDF', href: 'resume.html#resume-document-title' }] }, ['resume', 'pdf resume', 'download resume', 'download my resume', 'download your cv']);
   addRecord({ title: 'GitHub', kind: 'section', answer: 'My GitHub is linked in Contact. Projects also links to the public repositories for individual case studies when available.',
