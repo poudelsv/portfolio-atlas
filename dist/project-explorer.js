@@ -262,16 +262,43 @@ function initExplorer(openProject) {
   network.addEventListener('focusout', unhighlight);
   new ResizeObserver(scheduleDraw).observe(network);
   const relationships = node('details', '', 'explorer-details');
+  relationships.id = 'project-tree';
   relationships.append(node('summary', 'Explore project relationships'), map);
   relationships.addEventListener('toggle', scheduleDraw);
   section.replaceChildren(header, filters, resultsHeader, cards, pager, relationships);
+
   const route = new URLSearchParams(location.search);
-  const field = fields.find(item => item.toLowerCase() === route.get('field')?.toLowerCase());
-  setField(field || '');
+  const requestedField = route.get('field')?.trim().toLowerCase();
+  selectedField = fields.find(field => field.toLowerCase() === requestedField) || '';
+  const requestedTool = route.get('tool')?.trim().toLowerCase();
+  if (requestedTool) {
+    selectedTool = projects.filter(project => !selectedField || (project.fields || []).includes(selectedField))
+      .flatMap(project => project.tools || []).find(tool => tool.toLowerCase() === requestedTool) || '';
+  }
+  render();
+
   const requestedProject = route.get('project');
   const index = displayedProjects.findIndex(project => sapoSlug(project.title) === requestedProject);
+  const project = displayedProjects[index];
+  const opensTree = () => location.hash === '#' + relationships.id;
   if (index >= 0) {
     showProject(index);
-    openProject(displayedProjects[index]);
+    if (!opensTree()) openProject(project);
   }
+
+  function revealTree() {
+    if (!opensTree()) return;
+    relationships.open = true;
+    const projectNode = projectNodes.get(project);
+    if (projectNode) highlighted = projectNode;
+    (projectNode || relationships).scrollIntoView({ block: projectNode ? 'center' : 'start', inline: 'nearest', behavior: 'instant' });
+    scheduleDraw();
+  }
+
+  if (opensTree()) {
+    relationships.open = true;
+    if (document.readyState === 'complete') revealTree();
+    else window.addEventListener('DOMContentLoaded', revealTree, { once: true });
+  }
+  window.addEventListener('hashchange', revealTree);
 }

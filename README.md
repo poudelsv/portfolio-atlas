@@ -31,7 +31,7 @@ The site runs directly from `dist/`. A modern browser supports the Canvas animat
 
 Planetary covers and the starfield are drawn in Canvas. Reduced-motion preferences turn off page morphs, companion following, and automatic résumé playback.
 
-`sapo` ranks questions against the portfolio’s projects, role descriptions, skills, credentials, creative work, and first-person question examples. It builds its search index in the browser and links answers to the source material. Unrelated questions get a short redirect. Chat messages stay on the device and the site requires no API key, model download, or inference server.
+`sapo` fits a browser-based search model to the portfolio’s projects, roles, skills, credentials, creative work, and first-person examples. It repairs common typos, uses the last topic for follow-up questions, and can prioritize sources the visitor opens during the session. Work and tool answers include project-tree links. The browser stores only the selected portfolio links for this preference. Questions stay in the chat, and the site requires no API key, model download, or inference server.
 
 Run `node --test tests/sapo-search.test.cjs` to verify answer routing, privacy handling, and source links.
 
@@ -43,7 +43,7 @@ Run `node --test tests/sapo-search.test.cjs` to verify answer routing, privacy h
 | [`dist/resume.js`](dist/resume.js) | Career timeline and collaborator logo presentation. Replace [the bundled résumé PDF](dist/assets/Saurav-Poudel-Resume.pdf) when updating the downloadable version. |
 | [`dist/creative.js`](dist/creative.js) and [`dist/behance-works.js`](dist/behance-works.js) | Gallery content, sample frames, toolsets, and published work links. Place local gallery media in [`dist/assets/creative/`](dist/assets/creative/). |
 | [`dist/landing.js`](dist/landing.js) | Chat interface, contact panel, and project case-study dialogs. |
-| [`dist/sapo-profile.js`](dist/sapo-profile.js) and [`dist/sapo-search.js`](dist/sapo-search.js) | First-person examples, portfolio search, and answer links. |
+| [`dist/sapo-profile.js`](dist/sapo-profile.js), [`dist/sapo-language.js`](dist/sapo-language.js), and [`dist/sapo-search.js`](dist/sapo-search.js) | First-person examples, typo and intent matching, portfolio search, and answer links. |
 | [`dist/sapo-buddy.js`](dist/sapo-buddy.js) and [`dist/sapo-buddy.css`](dist/sapo-buddy.css) | Companion movement, occasional messages, click reactions, and the momo ride. |
 | [`dist/earth.js`](dist/earth.js), [`dist/planets.js`](dist/planets.js), and [`dist/solar.css`](dist/solar.css) | Procedural planetary covers, shared view transitions, and layout. |
 
