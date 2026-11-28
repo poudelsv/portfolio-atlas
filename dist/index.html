@@ -20,7 +20,7 @@
   <link rel="stylesheet" href="solar.css?v=case-studies">
   <link rel="stylesheet" href="sapo-dock.css?v=invite">
   <link rel="stylesheet" href="sapo-buddy.css?v=momo">
-  <link rel="stylesheet" href="landing-scene.css?v=2">
+  <link rel="stylesheet" href="landing-scene.css?v=3">
   <link rel="stylesheet" href="landing-showcase.css?v=2">
   <script defer src="landing-scene.js?v=1"></script>
   <script defer src="landing-showcase.js?v=2"></script>
@@ -41,17 +41,19 @@
     </section>
     <section class="landing-introduction" id="introduction" aria-label="Introduction" tabindex="-1">
       <figure class="landing-scene">
-        <canvas id="landing-sky" class="landing-sky" aria-hidden="true"></canvas>
-        <div class="landing-atmosphere" aria-hidden="true">
-          <span class="landing-orbit"><span></span></span>
-          <span class="landing-orbit landing-orbit-wide"><span></span></span>
-          <span class="landing-meteor"></span>
-          <span class="landing-meteor landing-meteor-far"></span>
+        <div class="landing-scene-composite">
+          <canvas id="landing-sky" class="landing-sky" aria-hidden="true"></canvas>
+          <div class="landing-atmosphere" aria-hidden="true">
+            <span class="landing-orbit"><span></span></span>
+            <span class="landing-orbit landing-orbit-wide"><span></span></span>
+            <span class="landing-meteor"></span>
+            <span class="landing-meteor landing-meteor-far"></span>
+          </div>
+          <img class="landing-landscape" src="assets/golden-gate-foreground.webp" width="2364" height="1330" alt="Saurav Poudel pointing toward the Golden Gate Bridge" decoding="async" loading="lazy">
+          <button class="landing-scene-wave" type="button" aria-label="Wave to the portfolio companion">
+            <span aria-hidden="true" class="landing-wave-marker">✦</span>
+          </button>
         </div>
-        <img class="landing-landscape" src="assets/golden-gate-foreground.webp" width="2364" height="1330" alt="Saurav Poudel pointing toward the Golden Gate Bridge" decoding="async" loading="lazy">
-        <button class="landing-scene-wave" type="button" aria-label="Wave to the portfolio companion">
-          <span aria-hidden="true" class="landing-wave-marker">✦</span>
-        </button>
       </figure>
       <div class="profile content-section">
         <p class="role" id="role">Data · Software · AI</p>

@@ -11,10 +11,17 @@ body[data-page="about"] #profile-name {
   position: relative;
   isolation: isolate;
   width: 100%;
-  aspect-ratio: 2364 / 1330;
+  /* The top 368 pixels are open sky above the tallest tower. */
+  aspect-ratio: 2364 / 962;
   margin: 0;
   overflow: hidden;
   background: #171d64;
+}
+
+.landing-scene-composite {
+  position: absolute;
+  inset: auto 0 0;
+  aspect-ratio: 2364 / 1330;
 }
 
 .landing-sky, .landing-atmosphere, .landing-landscape {
