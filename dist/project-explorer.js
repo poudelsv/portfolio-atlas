@@ -2,8 +2,20 @@
 
 function initExplorer(openProject) {
   const section = document.getElementById('works');
+  const relationships = document.getElementById('project-tree');
   const projects = landingData.projects;
   const fields = [...new Set([...(landingData.fields || []), ...projects.flatMap(project => project.fields || [])])];
+  const toolShortNames = {
+    'Entity Framework Core': 'EF Core',
+    'Great Expectations': 'Great Expect.',
+    'Ontology Actions': 'Ont. Actions',
+    'Role-based permissions': 'Role permissions',
+    'Salesforce CRM': 'SF CRM',
+    'Salesforce Flow': 'SF Flow',
+    'Salesforce Sandbox': 'SF Sandbox',
+    'Stored procedures': 'Stored procs',
+    'XR Interaction Toolkit': 'XR Toolkit',
+  };
 
   function node(tag, text = '', className = '') {
     const element = document.createElement(tag);
@@ -25,7 +37,9 @@ function initExplorer(openProject) {
   section.removeAttribute('aria-label');
 
   const header = node('header', '', 'explorer-header');
-  header.append(heading, node('p', 'Explore my work by field, or trace a project to the tools behind it.'));
+  const treeLink = node('a', 'Explore project relationships', 'explorer-tree-link');
+  treeLink.href = '#project-tree';
+  header.append(heading, node('p', 'Explore my work by field, or trace a project to the tools behind it.'), treeLink);
 
   const filters = node('div', '', 'explorer-filters');
   filters.setAttribute('role', 'group');
@@ -55,23 +69,32 @@ function initExplorer(openProject) {
   let displayedIndex = 0;
   let projectTransition;
 
-  const map = node('figure', '', 'explorer-map');
-  const caption = node('figcaption');
-  const instructions = node('p', 'Select a field or tool to filter the projects. Select a project to see its details.');
-  caption.append(instructions);
+  const treeHeader = node('header', '', 'explorer-tree-header');
+  const treeTitle = node('h2', 'Explore project relationships');
+  treeTitle.id = 'project-tree-title';
+  const instructions = node('p', 'Select a field or tool to filter. Select a project to open its case study.', 'explorer-tree-caption');
+  const treeControls = node('div', '', 'explorer-tree-controls');
+  const treeStatus = node('p', '', 'explorer-tree-status');
+  treeStatus.setAttribute('role', 'status');
+  const treeClear = button('Clear filters', 'explorer-clear', () => {
+    setField('');
+    fieldNodes.values().next().value?.focus({ preventScroll: true });
+  });
+  treeControls.append(treeStatus, treeClear);
+  treeHeader.append(treeTitle, instructions, treeControls);
+
+  const map = node('div', '', 'explorer-map');
   const emptyMap = node('p', '', 'explorer-map-empty');
-  const scroll = node('div', '', 'explorer-map-scroll');
   const network = node('div', '', 'explorer-network');
   const canvas = node('canvas', '', 'explorer-edges');
   canvas.setAttribute('aria-hidden', 'true');
   network.append(canvas);
-  scroll.append(network);
-  map.append(caption, scroll, emptyMap);
+  map.append(network, emptyMap);
 
   const groups = ['Fields', 'Projects', 'Tools'].map(label => {
     const part = node('div', '', 'explorer-network-column');
     const list = node('ul');
-    part.append(node('h4', label), list);
+    part.append(node('h3', label), list);
     network.append(part);
     return list;
   });
@@ -80,45 +103,86 @@ function initExplorer(openProject) {
   const fieldNodes = new Map();
   const projectNodes = new Map();
   const toolNodes = new Map();
+  const nodeDetails = new WeakMap();
   const filterButtons = new Map();
   let selectedField = '';
   let selectedTool = '';
-  let highlighted;
+  let pointerNode;
+  let focusedNode;
+  let linkedProject;
   let diagramProjects = [];
   let pendingDraw;
 
-  function drawMap() {
-    if (!context || scroll.hidden) return;
-    const area = network.getBoundingClientRect();
-    const ratio = Math.min(window.devicePixelRatio || 1, 2);
-    canvas.width = Math.ceil(area.width * ratio);
-    canvas.height = Math.ceil(area.height * ratio);
-    context.setTransform(ratio, 0, 0, ratio, 0, 0);
+  function traceNodes() {
+    const linked = projectNodes.get(linkedProject);
+    const root = pointerNode || focusedNode || linked || toolNodes.get(selectedTool) || fieldNodes.get(selectedField);
+    const scope = nodeDetails.get(root);
+    const related = new Set();
+    const matches = new Set();
+    if (scope) {
+      for (const project of diagramProjects) {
+        if (scope.kind === 'project' ? project !== scope.key : !(project[scope.kind + 's'] || []).includes(scope.key)) continue;
+        matches.add(project);
+        related.add(projectNodes.get(project));
+        for (const field of project.fields || []) if (scope.kind !== 'field' || field === scope.key) related.add(fieldNodes.get(field));
+        for (const tool of project.tools || []) if (scope.kind !== 'tool' || tool === scope.key) related.add(toolNodes.get(tool));
+      }
+    }
+    const nodes = [...fieldNodes.values(), ...projectNodes.values(), ...toolNodes.values()];
+    for (const item of nodes) {
+      item.classList.toggle('is-current', item === root);
+      item.classList.toggle('is-related', related.has(item));
+      item.classList.toggle('is-dimmed', Boolean(scope) && !related.has(item));
+    }
+    return { root, matches, related };
+  }
 
-    function connect(left, right, project, facet) {
-      if (!left || !right) return;
-      const first = left.getBoundingClientRect();
-      const second = right.getBoundingClientRect();
+  function drawMap() {
+    if (network.hidden) return;
+    const { root, matches, related } = traceNodes();
+    if (!context) return;
+    const area = network.getBoundingClientRect();
+    if (!area.width || !area.height) return;
+    const ratio = Math.min(window.devicePixelRatio || 1, 2);
+    const width = Math.ceil(area.width * ratio);
+    const height = Math.ceil(area.height * ratio);
+    if (canvas.width !== width) canvas.width = width;
+    if (canvas.height !== height) canvas.height = height;
+    context.setTransform(ratio, 0, 0, ratio, 0, 0);
+    context.clearRect(0, 0, area.width, area.height);
+
+    const bounds = new Map([...fieldNodes.values(), ...projectNodes.values(), ...toolNodes.values()]
+      .map(item => [item, item.getBoundingClientRect()]));
+    const edges = [];
+    function connect(left, right, project, toolEdge = false) {
+      if (!bounds.has(left) || !bounds.has(right)) return;
+      edges.push({ left, right, focused: matches.has(project) && related.has(left) && related.has(right), toolEdge });
+    }
+    for (const project of diagramProjects) {
+      const projectNode = projectNodes.get(project);
+      for (const field of project.fields || []) connect(fieldNodes.get(field), projectNode, project);
+      for (const tool of project.tools || []) connect(projectNode, toolNodes.get(tool), project, true);
+    }
+
+    const toolStart = groups[2].getBoundingClientRect().left - area.left;
+    // Draw subdued paths first so the active relationships stay visible at crossings.
+    for (const { left, right, focused, toolEdge } of edges.sort((a, b) => Number(a.focused) - Number(b.focused))) {
+      const first = bounds.get(left);
+      const second = bounds.get(right);
       const x1 = first.right - area.left;
       const x2 = second.left - area.left;
       const y1 = first.top - area.top + first.height / 2;
       const y2 = second.top - area.top + second.height / 2;
-      const middle = (x1 + x2) / 2;
-      const active = highlighted && [left, right].includes(highlighted);
-      const selected = selectedTool && (project.tools || []).includes(selectedTool);
-      context.strokeStyle = active || selected || facet === selectedField ? '#c8baff' : '#81759c';
-      context.globalAlpha = highlighted && !active ? .2 : .78;
-      context.lineWidth = active || selected ? 2 : 1;
+      const entry = toolEdge ? toolStart : x2;
+      const middle = (x1 + entry) / 2;
+      context.strokeStyle = toolEdge ? '#9ab2f4' : '#c7a9ff';
+      context.globalAlpha = focused ? .88 : root ? .055 : toolEdge ? .14 : .24;
+      context.lineWidth = focused ? 1.55 : .8;
       context.beginPath();
       context.moveTo(x1, y1);
-      context.bezierCurveTo(middle, y1, middle, y2, x2, y2);
+      context.bezierCurveTo(middle, y1, middle, y2, entry, y2);
+      if (toolEdge) context.lineTo(x2, y2);
       context.stroke();
-    }
-
-    for (const project of diagramProjects) {
-      const projectNode = projectNodes.get(project);
-      for (const field of project.fields || []) connect(fieldNodes.get(field), projectNode, project, field);
-      for (const tool of project.tools || []) connect(projectNode, toolNodes.get(tool), project);
     }
   }
 
@@ -127,9 +191,19 @@ function initExplorer(openProject) {
     pendingDraw = requestAnimationFrame(drawMap);
   }
 
-  function diagramButton(list, label, className, action, pressed) {
+  function diagramButton(list, label, kind, key, action, pressed) {
     const entry = node('li');
-    const item = button(label, 'explorer-node ' + className, action);
+    const item = button('', 'explorer-node ' + kind + '-node', action);
+    const shortLabel = kind === 'project' && label.length > 30
+      ? key.aliases?.find(alias => alias.length >= 9 && alias.length <= 28)
+      : kind === 'tool' ? toolShortNames[label] : null;
+    item.append(node('span', label, shortLabel ? 'explorer-label-full' : ''));
+    if (shortLabel) {
+      item.append(node('span', shortLabel, 'explorer-label-short'));
+      item.setAttribute('aria-label', label);
+    }
+    item.title = label;
+    nodeDetails.set(item, { kind, key });
     if (pressed !== undefined) item.setAttribute('aria-pressed', String(pressed));
     entry.append(item);
     list.append(entry);
@@ -140,7 +214,8 @@ function initExplorer(openProject) {
     const focus = document.activeElement;
     const rememberedField = [...fieldNodes].find(([, item]) => item === focus)?.[0];
     const rememberedTool = [...toolNodes].find(([, item]) => item === focus)?.[0];
-    highlighted = undefined;
+    pointerNode = undefined;
+    focusedNode = undefined;
     fieldNodes.clear();
     projectNodes.clear();
     toolNodes.clear();
@@ -149,24 +224,25 @@ function initExplorer(openProject) {
     const tools = [...new Set(diagramProjects.flatMap(project => project.tools || []))].sort((a, b) => a.localeCompare(b));
 
     for (const field of fields.filter(candidate => visibleFields.has(candidate))) {
-      fieldNodes.set(field, diagramButton(groups[0], field, 'field-node', () => setField(selectedField === field ? '' : field), field === selectedField));
+      fieldNodes.set(field, diagramButton(groups[0], field, 'field', field, () => setField(selectedField === field ? '' : field), field === selectedField));
     }
     for (const project of diagramProjects) {
-      projectNodes.set(project, diagramButton(groups[1], project.title, 'project-node', () => openProject(project)));
+      projectNodes.set(project, diagramButton(groups[1], project.title, 'project', project, () => openProject(project)));
     }
     for (const tool of tools) {
-      toolNodes.set(tool, diagramButton(groups[2], tool, 'tool-node', () => {
+      toolNodes.set(tool, diagramButton(groups[2], tool, 'tool', tool, () => {
         selectedTool = selectedTool === tool ? '' : tool;
+        linkedProject = undefined;
         render();
       }, tool === selectedTool));
     }
     if (!tools.length) groups[2].append(node('li', 'No tools listed', 'explorer-node-empty'));
 
-    scroll.hidden = diagramProjects.length === 0;
-    emptyMap.hidden = !scroll.hidden;
+    network.hidden = diagramProjects.length === 0;
+    emptyMap.hidden = !network.hidden;
     emptyMap.textContent = 'Relationships appear when a project is added to this field.';
-    if (rememberedField) (fieldNodes.get(rememberedField) || filterButtons.get(selectedField)).focus();
-    if (rememberedTool) (toolNodes.get(rememberedTool) || filterButtons.get(selectedField)).focus();
+    if (rememberedField) (fieldNodes.get(rememberedField) || fieldNodes.values().next().value || treeLink).focus({ preventScroll: true });
+    if (rememberedTool) (toolNodes.get(rememberedTool) || fieldNodes.values().next().value || treeLink).focus({ preventScroll: true });
     scheduleDraw();
   }
 
@@ -215,6 +291,8 @@ function initExplorer(openProject) {
     const contextLabel = [selectedField, selectedTool].filter(Boolean).join(' · ');
     status.textContent = displayedProjects.length + (displayedProjects.length === 1 ? ' project' : ' projects') + (contextLabel ? ' · ' + contextLabel : '');
     clear.hidden = !contextLabel;
+    treeStatus.textContent = contextLabel ? status.textContent : '';
+    treeControls.hidden = !contextLabel;
     picker.replaceChildren(...displayedProjects.map((project, index) => {
       const option = node('option', project.title);
       option.value = String(index);
@@ -227,6 +305,7 @@ function initExplorer(openProject) {
   function setField(field) {
     selectedField = field;
     selectedTool = '';
+    linkedProject = undefined;
     render();
   }
 
@@ -242,30 +321,26 @@ function initExplorer(openProject) {
     filters.append(item);
   }
 
-  function highlight(event) {
-    const target = event.target.closest('.explorer-node');
-    if (target === highlighted) return;
-    highlighted = target;
+  network.addEventListener('pointerover', event => {
+    if (event.pointerType === 'touch') return;
+    pointerNode = event.target.closest('.explorer-node');
     scheduleDraw();
-  }
-
-  function unhighlight(event) {
-    if (!event.relatedTarget?.closest?.('.explorer-node')) {
-      highlighted = undefined;
-      scheduleDraw();
-    }
-  }
-
-  network.addEventListener('pointerover', highlight);
-  network.addEventListener('pointerout', unhighlight);
-  network.addEventListener('focusin', highlight);
-  network.addEventListener('focusout', unhighlight);
+  });
+  network.addEventListener('pointerleave', () => {
+    pointerNode = undefined;
+    scheduleDraw();
+  });
+  network.addEventListener('focusin', event => {
+    focusedNode = event.target.closest('.explorer-node');
+    scheduleDraw();
+  });
+  network.addEventListener('focusout', event => {
+    focusedNode = event.relatedTarget?.closest?.('.explorer-node');
+    scheduleDraw();
+  });
   new ResizeObserver(scheduleDraw).observe(network);
-  const relationships = node('details', '', 'explorer-details');
-  relationships.id = 'project-tree';
-  relationships.append(node('summary', 'Explore project relationships'), map);
-  relationships.addEventListener('toggle', scheduleDraw);
-  section.replaceChildren(header, filters, resultsHeader, cards, pager, relationships);
+  section.replaceChildren(header, filters, resultsHeader, cards, pager);
+  relationships.replaceChildren(treeHeader, map);
 
   const route = new URLSearchParams(location.search);
   const requestedField = route.get('field')?.trim().toLowerCase();
@@ -288,17 +363,12 @@ function initExplorer(openProject) {
 
   function revealTree() {
     if (!opensTree()) return;
-    relationships.open = true;
-    const projectNode = projectNodes.get(project);
-    if (projectNode) highlighted = projectNode;
-    (projectNode || relationships).scrollIntoView({ block: projectNode ? 'center' : 'start', inline: 'nearest', behavior: 'instant' });
+    linkedProject = project;
+    relationships.scrollIntoView({ block: 'start', inline: 'nearest', behavior: 'instant' });
     scheduleDraw();
   }
 
-  if (opensTree()) {
-    relationships.open = true;
-    if (document.readyState === 'complete') revealTree();
-    else window.addEventListener('DOMContentLoaded', revealTree, { once: true });
-  }
+  if (opensTree() && document.readyState !== 'complete') window.addEventListener('DOMContentLoaded', revealTree, { once: true });
+  else revealTree();
   window.addEventListener('hashchange', revealTree);
 }
