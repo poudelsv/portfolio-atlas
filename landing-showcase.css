@@ -22,7 +22,13 @@
 }
 .showcase-playback:hover { color: #fff; }
 .showcase-row + .showcase-row { margin-top: clamp(1.8rem, 5vw, 3.6rem); }
-.showcase-row-label { margin-block: 0 .65rem; font-size: clamp(1.48rem, 3.2vw, 2.4rem); letter-spacing: -.035em; }
+.showcase-row-label {
+  margin-block: 0 .8rem;
+  font-size: clamp(1.48rem, 3.2vw, 2.4rem);
+  letter-spacing: -.035em;
+  text-align: center;
+  text-wrap: balance;
+}
 .showcase-viewport {
   overflow: hidden;
   mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
@@ -42,28 +48,42 @@
   display: flex;
   flex: none;
   align-items: center;
-  gap: clamp(2.6rem, 6vw, 6.5rem);
+  justify-content: space-around;
+  min-inline-size: 100vi;
+  gap: var(--mark-gap);
   margin: 0;
-  padding: .9rem clamp(2.6rem, 6vw, 6.5rem) .9rem 0;
+  padding: .9rem calc(var(--mark-gap) / 2);
   list-style: none;
 }
-.showcase-mark {
-  display: flex;
-  align-items: center;
-  gap: .68rem;
-  min-height: 56px;
-  text-decoration: none;
-  white-space: nowrap;
+.showcase-row-companies {
+  --mark-gap: clamp(1.6rem, 3.5vw, 3rem);
+  --mark-slot: clamp(6.3rem, 13vw, 10.25rem);
+  --mark-width: 100%;
+  --mark-height: clamp(2.3rem, 4vw, 3.3rem);
 }
-.showcase-mark-label { display: grid; gap: .17rem; }
-.showcase-mark-name { font-size: clamp(.93rem, 1.5vw, 1.12rem); font-weight: 650; line-height: 1.15; }
-.showcase-mark-detail { font-size: .76rem; line-height: 1; color: #c3bcd3; }
-.showcase-logo { width: clamp(2.7rem, 5vw, 4.6rem); height: clamp(1.65rem, 3.7vw, 2.45rem); object-fit: contain; }
-.showcase-row-tools .showcase-logo { width: clamp(1.85rem, 3.3vw, 2.65rem); }
+.showcase-row-tools {
+  --mark-gap: clamp(1.2rem, 3.7vw, 3.4rem);
+  --mark-slot: clamp(4.5rem, 7vw, 7rem);
+  --mark-height: clamp(2.1rem, 4.15vw, 3.05rem);
+  --mark-width: var(--mark-height);
+}
+.showcase-mark {
+  display: grid;
+  place-items: center;
+  inline-size: var(--mark-slot);
+  min-block-size: max(44px, var(--mark-height));
+  padding-inline: .12rem;
+}
+.showcase-logo {
+  display: block;
+  inline-size: var(--mark-width);
+  block-size: var(--mark-height);
+  object-fit: contain;
+}
+.showcase-mark[data-shape="compact"] { --mark-width: clamp(2.9rem, 6vw, 5.3rem); }
+.showcase-mark[data-shape="wide"] { --mark-width: 100%; }
 .showcase-logo-light { filter: brightness(0) invert(1); }
 .showcase-logo-reverse { filter: invert(1); }
-.showcase-logo-lsg { object-position: center; }
-.showcase-mark:is(:hover, :focus-visible) { color: #e2d8ff; }
 
 :is(.landing-showcase.is-still .showcase-viewport, .showcase-viewport:has(:focus-visible)) {
   overflow-x: auto;
