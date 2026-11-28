@@ -15,7 +15,6 @@ body[data-page="about"] #profile-name {
   margin: 0;
   overflow: hidden;
   background: #171d64;
-  mask-image: linear-gradient(to bottom, transparent, #000 18%, #000 86%, transparent);
 }
 
 .landing-sky, .landing-atmosphere, .landing-landscape {

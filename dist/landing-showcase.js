@@ -11,13 +11,14 @@
     const name = key === 'uc' ? 'University of Cincinnati' : role.organization;
     const logo = companyLogos[key];
     if (!logo || employers.has(name)) continue;
-    employers.set(name, { name, logo, detail: 'Employer', href: 'resume.html#resume-history' });
+    employers.set(name, { name, logo, href: 'resume.html#resume-history' });
   }
 
+  const compactCompanies = new Set(['LSG Sky Chefs', 'IBM', 'DO & CO', 'Salesforce', 'TSA']);
   const companies = [
     ...employers.values(),
     ...landingData.collaborators.filter(([name]) => !employers.has(name)).map(([name, logo, treatment]) => ({
-      name, logo: 'assets/' + logo, treatment, detail: 'Collaborator', href: 'resume.html#resume-companies',
+      name, logo: 'assets/' + logo, treatment, shape: compactCompanies.has(name) ? 'compact' : '', href: 'resume.html#resume-companies',
     })),
   ];
   const projectTools = new Set(landingData.projects.flatMap(project => project.tools || []));
@@ -32,10 +33,10 @@
     ['Node.js', 'tools/nodejs.svg'],
     ['Docker', 'tools/docker.svg'],
     ['Apache Airflow', 'tools/airflow.svg'],
-    ['Salesforce CRM', 'companies/salesforce.svg'],
-    ['Palantir Foundry', 'companies/palantir.svg', 'light'],
-  ].map(([name, logo, treatment]) => ({
-    name, logo: 'assets/' + logo, treatment,
+    ['Salesforce CRM', 'companies/salesforce.svg', '', 'compact'],
+    ['Palantir Foundry', 'companies/palantir.svg', 'light', 'wide'],
+  ].map(([name, logo, treatment, shape]) => ({
+    name, logo: 'assets/' + logo, treatment, shape,
     href: projectTools.has(name) ? 'projects.html?tool=' + encodeURIComponent(name) + '#project-tree' : skills.has(name) ? 'resume.html#resume-skills' : '',
   }));
 
@@ -56,25 +57,22 @@
   function createList(entries, duplicate) {
     const list = element('ul', 'showcase-list');
     if (duplicate) list.setAttribute('aria-hidden', 'true');
-    for (const { name, logo, detail, href, treatment } of entries) {
+    for (const { name, logo, href, treatment, shape } of entries) {
       const item = element('li', 'showcase-item');
       const card = element(href ? 'a' : 'div', 'showcase-mark');
       if (href) {
         card.href = href;
+        card.setAttribute('aria-label', name);
         if (duplicate) card.tabIndex = -1;
       }
       const icon = element('img', 'showcase-logo' + (treatment ? ' showcase-logo-' + treatment : ''));
+      if (shape) card.dataset.shape = shape;
       icon.src = logo;
-      icon.alt = '';
-      icon.width = 88;
-      icon.height = 42;
+      icon.alt = href ? '' : name;
       icon.decoding = 'async';
       icon.loading = 'lazy';
       icon.addEventListener('error', () => { icon.hidden = true; }, { once: true });
-      const label = element('span', 'showcase-mark-label');
-      label.append(element('strong', 'showcase-mark-name', name));
-      if (detail) label.append(element('small', 'showcase-mark-detail', detail));
-      card.append(icon, label);
+      card.append(icon);
       item.append(card);
       list.append(item);
     }
